@@ -30,6 +30,7 @@ tab_control = ttk.Notebook(window)
 tab1 = ttk.Frame(tab_control)
 tab2 = ttk.Frame(tab_control)
 tab3 = ttk.Frame(tab_control)
+selectedRule = None
 
 
 class Rule:
@@ -46,10 +47,10 @@ class Condition:
 
 
 class Category:
-    def __init__(self, name, catID):
+    def __init__(self, name, catID, parentID):
         self.name = name
         self.id = catID
-        self.subCat = []
+        self.parentID = parentID
 
 
 class Transaction:
@@ -88,22 +89,79 @@ def loadFileButton():
     for t in transactions:
         print(t.dateTime + " " + t.text + " " + str(t.amount) + " " + str(t.balance) + " " + str(t.accountID) + " " +
               str(t.categoryID))
+    drawTransactions()
 
 
 def drawRules():
+    deleteAllChildren(tab1)
     row = 0
     for r in rules:
-        lbl = Label(tab1, text=catFromID(r.categoryID))
-        lbl.grid(sticky=W, row=row, column=0)
-        row += 1
-        for c in r.conditions:
-            lbl = Label(tab1, text=fieldString(c.field), padx=10)
-            lbl.grid(sticky=W, row=row, column=0)
-            lbl = Label(tab1, text=condString(c.conditionType))
-            lbl.grid(sticky=W, row=row, column=1)
-            lbl = Label(tab1, text=c.value)
-            lbl.grid(sticky=W, row=row, column=2)
+        if r == selectedRule:
+            e = Entry(tab1)
+            e.insert(0, catFromID(r.categoryID))
+            e.grid(sticky=W, row=row, column=0)
             row += 1
+            for c in r.conditions:
+                combo = ttk.Combobox(tab1, ["Date/time", "Text", "Amount"])
+                combo.grid(row=row, column=0)
+                combo = ttk.Combobox(tab1, ["<", "<=", "==", ">=", ">", "!=", "Contains"])
+                combo.grid(row=row, column=1)
+                e = Entry(tab1)
+                e.insert(0, c.value)
+                e.grid(sticky=W, row=row, column=2)
+                row += 1
+        else:
+            lbl = Label(tab1, text=catFromID(r.categoryID))
+            lbl.grid(sticky=W, row=row, column=0)
+            row += 1
+            for c in r.conditions:
+                lbl = Label(tab1, text=fieldString(c.field), padx=10)
+                lbl.grid(sticky=W, row=row, column=0)
+                lbl = Label(tab1, text=condString(c.conditionType))
+                lbl.grid(sticky=W, row=row, column=1)
+                lbl = Label(tab1, text=c.value)
+                lbl.grid(sticky=W, row=row, column=2)
+                row += 1
+
+
+def drawTransactions():
+    deleteAllChildren(tab2)
+    btn = Button(tab2, text="Load file", command=loadFileButton)
+    btn.grid(column=0, row=0)
+    lbl = Label(tab2, text="Date")
+    lbl.grid(sticky=W, row=1, column=0)
+    lbl = Label(tab2, text="Text")
+    lbl.grid(sticky=W, row=1, column=1)
+    lbl = Label(tab2, text="Amount")
+    lbl.grid(sticky=W, row=1, column=2)
+    lbl = Label(tab2, text="Balance")
+    lbl.grid(sticky=W, row=1, column=3)
+    row = 2
+    for t in transactions:
+        lbl = Label(tab2, text=t.dateTime)
+        lbl.grid(sticky=W, row=row, column=0)
+        lbl = Label(tab2, text=t.text)
+        lbl.grid(sticky=W, row=row, column=1)
+        lbl = Label(tab2, text=t.amount)
+        lbl.grid(sticky=W, row=row, column=2)
+        lbl = Label(tab2, text=t.balance)
+        lbl.grid(sticky=W, row=row, column=3)
+        row += 1
+
+
+def drawCategories():
+    deleteAllChildren(tab3)
+    lbl = Label(tab3, text="Category")
+    lbl.grid(sticky=W, row=0, column=0)
+    lbl = Label(tab3, text="Parent")
+    lbl.grid(sticky=W, row=0, column=1)
+    row = 1
+    for c in categories:
+        lbl = Label(tab3, text=c.name)
+        lbl.grid(sticky=W, row=row, column=0)
+        lbl = Label(tab3, text=catFromID(c.parentID))
+        lbl.grid(sticky=W, row=row, column=1)
+        row += 1
 
 
 def catFromID(catID):
@@ -141,26 +199,38 @@ def condString(condID):
     return ""
 
 
+def deleteAllChildren(item):
+    _list = item.winfo_children()
+    for item in _list:
+        if item.winfo_children():
+            _list.extend(item.winfo_children())
+    for i in _list:
+        i.destroy()
+
+
 def main():
     window.title("Money tracker")
     window.geometry("320x200")
     tab_control.add(tab1, text="Rules")
     tab_control.add(tab2, text="Transactions")
-    tab_control.add(tab3, text="Groups")
+    tab_control.add(tab3, text="Categories")
     tab_control.pack(expand=1, fill="both")
-    btn = Button(tab2, text="Load file", command=loadFileButton)
-    btn.grid(column=1, row=0)
 
-    categories.append(Category("Bil", 1))
-    categories.append(Category("Mat", 2))
+    categories.append(Category("Bil", 1, 0))
+    categories.append(Category("Mat", 2, 0))
+    categories.append(Category("Service", 3, 1))
     r = Rule(1)
     c = Condition(FIELD.TEXT, COND.C, "CIRCLE")
     r.conditions.append(c)
     c = Condition(FIELD.AMOUNT, COND.G, 100)
     r.conditions.append(c)
+    global selectedRule
+    selectedRule = r
     rules.append(r)
 
     drawRules()
+    drawTransactions()
+    drawCategories()
     window.mainloop()
 
 
