@@ -50,6 +50,29 @@ class Transaction:
         self.categoryID = categoryID
 
 
+def ruleCategorySelected(event):
+    event.widget.rule.categoryID = categories[event.widget.current()].id
+
+
+def conditionFieldSelected(event):
+    event.widget.condition.field = event.widget.current()+1
+
+
+def conditionTypeSelected(event):
+    event.widget.condition.conditionType = event.widget.current()+1
+
+
+def conditionValueChanged(sv):
+    if sv.condition.field == FIELD["AMOUNT"]:
+        try:
+            sv.condition.value = int(sv.get())
+        except ValueError:
+            None
+    else:
+        sv.condition.value = sv.get()
+    print("Value changed")
+
+
 def selectRule(event):
     print("selectRule")
     global selectedRule
@@ -94,6 +117,7 @@ def drawRules():
     for r in rules:
         if r == selectedRule:
             categoriesTextList = []
+            selectedIndex = 0
             for c in categories:
                 categoriesTextList.append(c.name)
                 if c.id == r.categoryID:
@@ -101,15 +125,24 @@ def drawRules():
             combo = ttk.Combobox(tab1, values=categoriesTextList, state="readonly")
             combo.grid(row=row, column=0)
             combo.current(selectedIndex)
+            combo.bind("<<ComboboxSelected>>", ruleCategorySelected)
+            combo.rule = r
             row += 1
             for c in r.conditions:
                 combo = ttk.Combobox(tab1, values=["Date/time", "Text", "Amount"], state="readonly")
                 combo.grid(row=row, column=0)
                 combo.current(c.field-1)
+                combo.bind("<<ComboboxSelected>>", conditionFieldSelected)
+                combo.condition = c
                 combo = ttk.Combobox(tab1, values=["<", "<=", "==", ">=", ">", "!=", "Contains"], state="readonly")
                 combo.grid(row=row, column=1)
                 combo.current(c.conditionType-1)
-                e = Entry(tab1)
+                combo.bind("<<ComboboxSelected>>", conditionTypeSelected)
+                combo.condition = c
+                sv = StringVar()
+                sv.condition = c
+                sv.trace("w", lambda name, index, mode, svArg=sv: conditionValueChanged(svArg))
+                e = Entry(tab1, textvariable=sv)
                 e.insert(0, c.value)
                 e.grid(sticky=W, row=row, column=2)
                 row += 1
@@ -198,7 +231,7 @@ def condString(condID):
     if condID == COND["LE"]:
         return "<="
     if condID == COND["E"]:
-        return "="
+        return "=="
     if condID == COND["GE"]:
         return ">="
     if condID == COND["G"]:
