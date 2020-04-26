@@ -1,24 +1,11 @@
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import *
-from enum import Enum
 
 
 # Constants
-class FIELD(Enum):
-    DATETIME = 1
-    TEXT = 2
-    AMOUNT = 3
-
-
-class COND(Enum):
-    L = 1
-    LE = 2
-    E = 3
-    GE = 4
-    G = 5
-    NE = 6
-    C = 7
+FIELD = {"DATETIME": 1, "TEXT": 2, "AMOUNT": 3}
+COND = {"L": 1, "LE": 2, "E": 3, "GE": 4, "G": 5, "NE": 6, "C": 7}
 
 
 # Global variables
@@ -63,6 +50,14 @@ class Transaction:
         self.categoryID = categoryID
 
 
+def selectRule(event):
+    print("selectRule")
+    global selectedRule
+    if selectedRule != event.widget.rule:
+        selectedRule = event.widget.rule
+        drawRules()
+
+
 def loadTransactions(fileName):
     f = open(fileName, "r")
     rows = f.read().split("\n")
@@ -93,19 +88,27 @@ def loadFileButton():
 
 
 def drawRules():
+    print("drawRules")
     deleteAllChildren(tab1)
     row = 0
     for r in rules:
         if r == selectedRule:
-            e = Entry(tab1)
-            e.insert(0, catFromID(r.categoryID))
-            e.grid(sticky=W, row=row, column=0)
+            categoriesTextList = []
+            for c in categories:
+                categoriesTextList.append(c.name)
+                if c.id == r.categoryID:
+                    selectedIndex = len(categoriesTextList)-1
+            combo = ttk.Combobox(tab1, values=categoriesTextList, state="readonly")
+            combo.grid(row=row, column=0)
+            combo.current(selectedIndex)
             row += 1
             for c in r.conditions:
-                combo = ttk.Combobox(tab1, ["Date/time", "Text", "Amount"])
+                combo = ttk.Combobox(tab1, values=["Date/time", "Text", "Amount"], state="readonly")
                 combo.grid(row=row, column=0)
-                combo = ttk.Combobox(tab1, ["<", "<=", "==", ">=", ">", "!=", "Contains"])
+                combo.current(c.field-1)
+                combo = ttk.Combobox(tab1, values=["<", "<=", "==", ">=", ">", "!=", "Contains"], state="readonly")
                 combo.grid(row=row, column=1)
+                combo.current(c.conditionType-1)
                 e = Entry(tab1)
                 e.insert(0, c.value)
                 e.grid(sticky=W, row=row, column=2)
@@ -113,14 +116,22 @@ def drawRules():
         else:
             lbl = Label(tab1, text=catFromID(r.categoryID))
             lbl.grid(sticky=W, row=row, column=0)
+            lbl.rule = r
+            lbl.bind("<Button-1>", selectRule)
             row += 1
             for c in r.conditions:
                 lbl = Label(tab1, text=fieldString(c.field), padx=10)
                 lbl.grid(sticky=W, row=row, column=0)
+                lbl.rule = r
+                lbl.bind("<Button-1>", selectRule)
                 lbl = Label(tab1, text=condString(c.conditionType))
                 lbl.grid(sticky=W, row=row, column=1)
+                lbl.rule = r
+                lbl.bind("<Button-1>", selectRule)
                 lbl = Label(tab1, text=c.value)
                 lbl.grid(sticky=W, row=row, column=2)
+                lbl.rule = r
+                lbl.bind("<Button-1>", selectRule)
                 row += 1
 
 
@@ -172,29 +183,29 @@ def catFromID(catID):
 
 
 def fieldString(fID):
-    if fID == FIELD.DATETIME:
+    if fID == FIELD["DATETIME"]:
         return "Date/time"
-    if fID == FIELD.AMOUNT:
+    if fID == FIELD["AMOUNT"]:
         return "Amount"
-    if fID == FIELD.TEXT:
+    if fID == FIELD["TEXT"]:
         return "Text"
     return ""
 
 
 def condString(condID):
-    if condID == COND.L:
+    if condID == COND["L"]:
         return "<"
-    if condID == COND.LE:
+    if condID == COND["LE"]:
         return "<="
-    if condID == COND.E:
+    if condID == COND["E"]:
         return "="
-    if condID == COND.GE:
+    if condID == COND["GE"]:
         return ">="
-    if condID == COND.G:
+    if condID == COND["G"]:
         return ">"
-    if condID == COND.C:
+    if condID == COND["C"]:
         return "Contains"
-    if condID == COND.NE:
+    if condID == COND["NE"]:
         return "!="
     return ""
 
@@ -219,13 +230,24 @@ def main():
     categories.append(Category("Bil", 1, 0))
     categories.append(Category("Mat", 2, 0))
     categories.append(Category("Service", 3, 1))
+
     r = Rule(1)
-    c = Condition(FIELD.TEXT, COND.C, "CIRCLE")
+    c = Condition(FIELD["TEXT"], COND["C"], "CIRCLE")
     r.conditions.append(c)
-    c = Condition(FIELD.AMOUNT, COND.G, 100)
+    c = Condition(FIELD["AMOUNT"], COND["G"], 100)
     r.conditions.append(c)
     global selectedRule
     selectedRule = r
+    rules.append(r)
+
+    r = Rule(2)
+    c = Condition(FIELD["TEXT"], COND["C"], "ICA")
+    r.conditions.append(c)
+    rules.append(r)
+
+    r = Rule(3)
+    c = Condition(FIELD["TEXT"], COND["C"], "KISTA")
+    r.conditions.append(c)
     rules.append(r)
 
     drawRules()
