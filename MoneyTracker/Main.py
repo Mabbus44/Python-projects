@@ -111,7 +111,6 @@ def loadFileButton():
 
 
 def drawRules():
-    print("drawRules")
     deleteAllChildren(tab1)
     row = 0
     for r in rules:
