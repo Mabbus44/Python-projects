@@ -91,25 +91,56 @@
     </option>
   </component>
   <component name="WindowStateProjectService">
-    <state width="1659" height="272" key="GridCell.Tab.0.bottom" timestamp="1587934644992">
+    <state x="294" y="159" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1587991638731">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1587934644992" />
-    <state width="1659" height="272" key="GridCell.Tab.0.center" timestamp="1587934644992">
+    <state x="294" y="159" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1010@0.0.1680.1010" timestamp="1587991638731" />
+    <state width="1659" height="336" key="GridCell.Tab.0.bottom" timestamp="1587994318489">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.center/0.0.1680.1010@0.0.1680.1010" timestamp="1587934644992" />
-    <state width="1659" height="272" key="GridCell.Tab.0.left" timestamp="1587934644992">
+    <state width="1659" height="336" key="GridCell.Tab.0.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318489" />
+    <state width="1659" height="336" key="GridCell.Tab.0.center" timestamp="1587994318488">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.left/0.0.1680.1010@0.0.1680.1010" timestamp="1587934644992" />
-    <state width="1659" height="272" key="GridCell.Tab.0.right" timestamp="1587934644992">
+    <state width="1659" height="336" key="GridCell.Tab.0.center/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318488" />
+    <state width="1659" height="336" key="GridCell.Tab.0.left" timestamp="1587994318488">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.right/0.0.1680.1010@0.0.1680.1010" timestamp="1587934644992" />
-    <state x="536" y="328" key="com.intellij.ide.util.TipDialog" timestamp="1587929157449">
+    <state width="1659" height="336" key="GridCell.Tab.0.left/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318488" />
+    <state width="1659" height="336" key="GridCell.Tab.0.right" timestamp="1587994318488">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state x="536" y="328" key="com.intellij.ide.util.TipDialog/0.0.1680.1010@0.0.1680.1010" timestamp="1587929157449" />
+    <state width="1659" height="336" key="GridCell.Tab.0.right/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318488" />
+    <state width="1659" height="336" key="GridCell.Tab.1.bottom" timestamp="1587994318489">
+      <screen x="0" y="0" width="1680" height="1010" />
+    </state>
+    <state width="1659" height="336" key="GridCell.Tab.1.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318489" />
+    <state width="1659" height="336" key="GridCell.Tab.1.center" timestamp="1587994318489">
+      <screen x="0" y="0" width="1680" height="1010" />
+    </state>
+    <state width="1659" height="336" key="GridCell.Tab.1.center/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318489" />
+    <state width="1659" height="336" key="GridCell.Tab.1.left" timestamp="1587994318489">
+      <screen x="0" y="0" width="1680" height="1010" />
+    </state>
+    <state width="1659" height="336" key="GridCell.Tab.1.left/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318489" />
+    <state width="1659" height="336" key="GridCell.Tab.1.right" timestamp="1587994318489">
+      <screen x="0" y="0" width="1680" height="1010" />
+    </state>
+    <state width="1659" height="336" key="GridCell.Tab.1.right/0.0.1680.1010@0.0.1680.1010" timestamp="1587994318489" />
+    <state x="536" y="328" key="com.intellij.ide.util.TipDialog" timestamp="1587989587942">
+      <screen x="0" y="0" width="1680" height="1010" />
+    </state>
+    <state x="536" y="328" key="com.intellij.ide.util.TipDialog/0.0.1680.1010@0.0.1680.1010" timestamp="1587989587942" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Main.py</url>
+          <line>215</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -193,19 +193,30 @@ def drawTransactions():
         row += 1
 
 
+def addTreeItem(tree, catCopy, category):
+    if category.parentID == 0:
+        tree.insert("", "end", category.id, text=category.name)
+        catCopy.remove(category)
+        return
+    else:
+        for c in catCopy:
+            if c.id == category.parentID:
+                addTreeItem(tree, catCopy, c)
+                break
+        tree.insert(category.parentID, "end", category.id, text=category.name)
+        catCopy.remove(category)
+        return
+
+
 def drawCategories():
     deleteAllChildren(tab3)
-    lbl = Label(tab3, text="Category")
-    lbl.grid(sticky=W, row=0, column=0)
-    lbl = Label(tab3, text="Parent")
-    lbl.grid(sticky=W, row=0, column=1)
-    row = 1
-    for c in categories:
-        lbl = Label(tab3, text=c.name)
-        lbl.grid(sticky=W, row=row, column=0)
-        lbl = Label(tab3, text=catFromID(c.parentID))
-        lbl.grid(sticky=W, row=row, column=1)
-        row += 1
+    tree = ttk.Treeview(tab3)
+    tree.column("#0", width=270, minwidth=270)
+    tree.heading("#0", text="Categories", anchor=W)
+    catCopy = categories.copy()
+    while len(catCopy) > 0:
+        addTreeItem(tree, catCopy, catCopy[0])
+    tree.pack(side=TOP, fill=X)
 
 
 def catFromID(catID):
@@ -263,6 +274,18 @@ def main():
     categories.append(Category("Bil", 1, 0))
     categories.append(Category("Mat", 2, 0))
     categories.append(Category("Service", 3, 1))
+    categories.append(Category("Cat4", 4, 15))
+    categories.append(Category("Cat5", 5, 12))
+    categories.append(Category("Cat6", 6, 15))
+    categories.append(Category("Cat7", 7, 10))
+    categories.append(Category("Cat8", 8, 15))
+    categories.append(Category("Cat9", 9, 8))
+    categories.append(Category("Cat10", 10, 4))
+    categories.append(Category("Cat11", 11, 15))
+    categories.append(Category("Cat12", 12, 10))
+    categories.append(Category("Cat13", 13, 7))
+    categories.append(Category("Cat14", 14, 7))
+    categories.append(Category("Cat15", 15, 0))
 
     r = Rule(1)
     c = Condition(FIELD["TEXT"], COND["C"], "CIRCLE")
