@@ -67,7 +67,7 @@ def conditionValueChanged(sv):
         try:
             sv.condition.value = int(sv.get())
         except ValueError:
-            None
+            pass
     else:
         sv.condition.value = sv.get()
     print("Value changed")
@@ -108,6 +108,21 @@ def loadFileButton():
         print(t.dateTime + " " + t.text + " " + str(t.amount) + " " + str(t.balance) + " " + str(t.accountID) + " " +
               str(t.categoryID))
     drawTransactions()
+
+
+def rightClickCategory(event):
+    iid = event.widget.identify_row(event.y)
+    if iid:
+        event.widget.selection_set(iid)
+        popup = event.widget.popup
+        try:
+            popup.tk_popup(event.x_root+60, event.y_root+13, 0)
+        finally:
+            popup.grab_release()
+
+
+def addCategory(tree):
+    print("Category added")
 
 
 def drawRules():
@@ -194,7 +209,7 @@ def drawTransactions():
 
 def addTreeItem(tree, catCopy, category):
     if category.parentID == 0:
-        tree.insert("", "end", category.id, text=category.name)
+        tree.insert("0", "end", category.id, text=category.name)
         catCopy.remove(category)
         return
     else:
@@ -210,8 +225,13 @@ def addTreeItem(tree, catCopy, category):
 def drawCategories():
     deleteAllChildren(tab3)
     tree = ttk.Treeview(tab3)
+    tree.bind("<Button-3>", rightClickCategory)
+    popup = Menu(tree, tearoff=0)
+    popup.add_command(label="Add new category", command=addCategory)
+    tree.popup = popup
     tree.column("#0", width=270, minwidth=270)
     tree.heading("#0", text="Categories", anchor=W)
+    tree.insert("", "end", 0, text="root")
     catCopy = categories.copy()
     while len(catCopy) > 0:
         addTreeItem(tree, catCopy, catCopy[0])
