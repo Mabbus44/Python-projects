@@ -227,7 +227,10 @@ def drawCategories():
     tree = ttk.Treeview(tab3)
     tree.bind("<Button-3>", rightClickCategory)
     popup = Menu(tree, tearoff=0)
-    popup.add_command(label="Add new category", command=addCategory)
+    # popup.add_command(label="Add new category", command=addCategory)
+    popup.add_command(label="Add new category", command=lambda treeArg=tree: addCategory(treeArg))
+    # sv.trace("w", lambda name, index, mode, svArg=sv: conditionValueChanged(svArg))
+
     tree.popup = popup
     tree.column("#0", width=270, minwidth=270)
     tree.heading("#0", text="Categories", anchor=W)
