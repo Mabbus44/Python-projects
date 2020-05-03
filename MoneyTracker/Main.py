@@ -24,19 +24,19 @@ selectedRule = None
 
 # Classes
 class Transaction:
-    def __init__(self, dateTime, text, amount, balance, accountID, categoryID):
+    def __init__(self, dateTime, text, amount, balance, account, category):
         self.dateTime = dateTime
         self.text = text
         self.amount = amount
         self.balance = balance              # Account balance after transaction
-        self.accountID = accountID
-        self.categoryID = categoryID
+        self.account = account
+        self.category = category
 
 
 class Rule:
-    def __init__(self, catID):
+    def __init__(self, category):
         self.conditions = []
-        self.categoryID = catID
+        self.category = category
 
 
 class Condition:
@@ -47,48 +47,37 @@ class Condition:
 
 
 class Category:
-    def __init__(self, name, catID, parentID):
+    def __init__(self, name, parent=None):
         self.name = name
-        self.id = catID
-        self.parentID = parentID
+        self.parent = parent
+        self.id = 0
 
 
 # Common functions
-def appendCategory(name, parentID):
-    freeID = 1
-    for c in categories:
-        if freeID <= c.id:
-            freeID = c.id+1
-    categories.append(Category(name, freeID, parentID))
+def tabChanged(event):
+    if tab_control.tab(tab_control.select(), "text") == "Transactions":
+        drawTransactions()
+    if tab_control.tab(tab_control.select(), "text") == "Rules":
+        drawRules()
+    if tab_control.tab(tab_control.select(), "text") == "Categories":
+        drawCategories()
 
 
-def deleteCategory(catID, catCopy):
-    for c in catCopy:
-        if c.id == catID:
-            for c2 in catCopy:
-                if c2.parentID == c.id:
-                    deleteCategory(c2.id, catCopy)
-            categories.remove(c)
+def appendCategory(name, parent=None):
+    categories.append(Category(name, parent))
 
 
-def catFromID(catID):
-    for c in categories:
-        if c.id == catID:
-            return c.name
-    return ""
-
-
-def setCatName(catID, catName):
-    for c in categories:
-        if c.id == catID:
-            c.name = catName
+def deleteCategory(category, catCopy):
+    if category.parent:
+        deleteCategory(category.parent, catCopy)
+    categories.remove(category)
 
 
 def appendRule(field=FIELD["TEXT"], cond=COND["C"], text="Type text here"):
-    catID = 0
+    category = None
     if len(categories) > 0:
-        catID = categories[0].id
-    r = Rule(catID)
+        category = categories[0]
+    r = Rule(category)
     c = Condition(field, cond, text)
     r.conditions.append(c)
     global selectedRule
@@ -140,6 +129,7 @@ def deleteAllChildren(item):
 
 # Transactions tab
 def drawTransactions():
+    print("Draw transactions")
     deleteAllChildren(tab1)
     btn = Button(tab1, text="Load file", command=loadFileButton)
     btn.grid(column=0, row=0)
@@ -168,9 +158,6 @@ def loadFileButton():
     filename = filedialog.askopenfilename(initialdir="/", title="Select file",
                                           filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
     loadTransactions(filename)
-    for t in transactions:
-        print(t.dateTime + " " + t.text + " " + str(t.amount) + " " + str(t.balance) + " " + str(t.accountID) + " " +
-              str(t.categoryID))
     drawTransactions()
 
 
@@ -190,11 +177,12 @@ def loadTransactions(fileName):
     transactions.clear()
     for row in cols:
         if maxID <= len(row)-1:
-            transactions.append(Transaction(row[dateID], row[textID], row[amountID], row[balanceID], 0, 0))
+            transactions.append(Transaction(row[dateID], row[textID], row[amountID], row[balanceID], None, None))
 
 
 # Rules tab
 def drawRules():
+    print("Draw rules")
     deleteAllChildren(tab2)
     row = 0
     for r in rules:
@@ -203,12 +191,16 @@ def drawRules():
             selectedIndex = 0
             for c in categories:
                 categoriesTextList.append(c.name)
-                if c.id == r.categoryID:
+                if c == r.category:
                     selectedIndex = len(categoriesTextList)-1
             combo = ttk.Combobox(tab2, values=categoriesTextList, state="readonly")
             combo.grid(row=row, column=0)
             combo.current(selectedIndex)
             combo.bind("<<ComboboxSelected>>", ruleCategorySelected)
+            combo.bind("<Button-3>", rightClickRule)
+            popup = Menu(combo, tearoff=0)
+            popup.add_command(label="Remove rule", command=lambda rArg=r: removeRule(rArg))
+            combo.popup = popup
             combo.rule = r
             row += 1
             for c in r.conditions:
@@ -216,11 +208,19 @@ def drawRules():
                 combo.grid(row=row, column=0)
                 combo.current(c.field-1)
                 combo.bind("<<ComboboxSelected>>", conditionFieldSelected)
+                combo.bind("<Button-3>", rightClickRule)
+                popup = Menu(combo, tearoff=0)
+                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
+                combo.popup = popup
                 combo.condition = c
                 combo = ttk.Combobox(tab2, values=["<", "<=", "==", ">=", ">", "!=", "Contains"], state="readonly")
                 combo.grid(row=row, column=1)
                 combo.current(c.conditionType-1)
                 combo.bind("<<ComboboxSelected>>", conditionTypeSelected)
+                combo.bind("<Button-3>", rightClickRule)
+                popup = Menu(combo, tearoff=0)
+                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
+                combo.popup = popup
                 combo.condition = c
                 sv = StringVar()
                 sv.condition = c
@@ -228,12 +228,16 @@ def drawRules():
                 e = Entry(tab2, textvariable=sv)
                 e.insert(0, c.value)
                 e.grid(sticky=W, row=row, column=2)
+                e.bind("<Button-3>", rightClickRule)
+                popup = Menu(e, tearoff=0)
+                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
+                e.popup = popup
                 row += 1
             btn = Button(tab2, text="+", command=lambda argR=r: addConditionButton(argR))
             btn.grid(row=row, column=1)
             row += 1
         else:
-            lbl = Label(tab2, text=catFromID(r.categoryID))
+            lbl = Label(tab2, text=r.category.name)
             lbl.grid(sticky=W, row=row, column=0)
             lbl.rule = r
             lbl.bind("<Button-1>", selectRule)
@@ -303,7 +307,6 @@ def removeCondition(r, c):
 
 
 def selectRule(event):
-    print("selectRule")
     global selectedRule
     if selectedRule != event.widget.rule:
         selectedRule = event.widget.rule
@@ -311,7 +314,7 @@ def selectRule(event):
 
 
 def ruleCategorySelected(event):
-    event.widget.rule.categoryID = categories[event.widget.current()].id
+    event.widget.rule.category = categories[event.widget.current()]
 
 
 def conditionFieldSelected(event):
@@ -330,7 +333,6 @@ def conditionValueChanged(sv):
             pass
     else:
         sv.condition.value = sv.get()
-    print("Value changed")
 
 
 # Categories tab
@@ -348,23 +350,25 @@ def drawCategories():
     tree.column("#0", width=270, minwidth=270)
     tree.heading("#0", text="Categories", anchor=W)
     tree.insert("", "end", 0, text="root")
+    for i in range(len(categories)):
+        categories[i].id = i+1
     catCopy = categories.copy()
     while len(catCopy) > 0:
         addTreeItem(tree, catCopy, catCopy[0])
-    tree.pack(side=TOP, fill=X)
+    tree.pack(side=TOP, fill=BOTH, expand=True)
 
 
 def addTreeItem(tree, catCopy, category):
-    if category.parentID == 0:
+    if not category.parent:
         tree.insert("0", "end", category.id, text=category.name)
         catCopy.remove(category)
         return
     else:
         for c in catCopy:
-            if c.id == category.parentID:
+            if c == category.parent:
                 addTreeItem(tree, catCopy, c)
                 break
-        tree.insert(category.parentID, "end", category.id, text=category.name)
+        tree.insert(category.parent.id if category.parent else "0", "end", category.id, text=category.name)
         catCopy.remove(category)
         return
 
@@ -391,54 +395,68 @@ def addCategory(tree):
     name = simpledialog.askstring("Category", "Name category", parent=window)
     if name is None:
         return
-    appendCategory(name, int(tree.selection()[0]))
-    drawCategories()
+    if int(tree.selection()[0]) == 0:
+        appendCategory(name, None)
+        drawCategories()
+        return
+    for c in categories:
+        if c.id == int(tree.selection()[0]):
+            appendCategory(name, c)
+            drawCategories()
+            return
 
 
 def renameCategory(tree):
+    if int(tree.selection()[0]) == 0:
+        return
     name = simpledialog.askstring("Category", "Rename category", parent=window)
     if name is not None:
-        setCatName(int(tree.selection()[0]), name)
-        drawCategories()
+        for c in categories:
+            if c.id == int(tree.selection()[0]):
+                c.name = name
+                drawCategories()
+                return
 
 
 def removeCategory(tree):
-    catID = int(tree.selection()[0])
-    if catID > 0:
-        answer = messagebox.askyesno("Warning!", "Do you really want to remove category '" + catFromID(catID) + "'?")
-        if not answer:
+    for c in categories:
+        if c.id == int(tree.selection()[0]):
+            answer = messagebox.askyesno("Warning!", "Do you really want to remove category '" + c.name + "'?")
+            if not answer:
+                return
+            catCopy = categories.copy()
+            deleteCategory(c, catCopy)
+            drawCategories()
             return
-        catCopy = categories.copy()
-        deleteCategory(catID, catCopy)
-        drawCategories()
 
 
 # Main
 def main():
     window.title("Money tracker")
-    window.geometry("320x200")
+    window.geometry("920x800")
     tab_control.add(tab1, text="Transactions")
     tab_control.add(tab2, text="Rules")
     tab_control.add(tab3, text="Categories")
     tab_control.pack(expand=1, fill="both")
+    tab_control.bind("<<NotebookTabChanged>>", lambda event: tabChanged(event))
 
-    categories.append(Category("Bil", 1, 0))
-    categories.append(Category("Mat", 2, 0))
-    categories.append(Category("Service", 3, 1))
-    categories.append(Category("Cat4", 4, 15))
-    categories.append(Category("Cat5", 5, 12))
-    categories.append(Category("Cat6", 6, 15))
-    categories.append(Category("Cat7", 7, 10))
-    categories.append(Category("Cat8", 8, 15))
-    categories.append(Category("Cat9", 9, 8))
-    categories.append(Category("Cat10", 10, 4))
-    categories.append(Category("Cat11", 11, 15))
-    categories.append(Category("Cat12", 12, 10))
-    categories.append(Category("Cat13", 13, 7))
-    categories.append(Category("Cat14", 14, 7))
-    categories.append(Category("Cat15", 15, 0))
+    categories.append(Category("Bil", None))
+    categories.append(Category("Mat", None))
+    categories.append(Category("Service", categories[0]))
+    categories.append(Category("Cat4", None))
+    categories.append(Category("Cat5", categories[3]))
+    categories.append(Category("Cat6", categories[3]))
+    categories.append(Category("Cat7", categories[3]))
+    categories.append(Category("Cat8", categories[4]))
+    categories.append(Category("Cat9", categories[4]))
+    categories.append(Category("Cat10", categories[7]))
+    categories.append(Category("Cat11", categories[7]))
+    categories.append(Category("Cat12", categories[8]))
+    categories.append(Category("Cat13", categories[5]))
+    categories.append(Category("Cat14", categories[6]))
+    categories.append(Category("Cat15", categories[8]))
 
-    r = Rule(1)
+    r = Rule(categories[0])
     c = Condition(FIELD["TEXT"], COND["C"], "CIRCLE")
     r.conditions.append(c)
     c = Condition(FIELD["AMOUNT"], COND["G"], 100)
@@ -447,19 +465,16 @@ def main():
     selectedRule = r
     rules.append(r)
 
-    r = Rule(2)
+    r = Rule(categories[1])
     c = Condition(FIELD["TEXT"], COND["C"], "ICA")
     r.conditions.append(c)
     rules.append(r)
 
-    r = Rule(3)
+    r = Rule(categories[2])
     c = Condition(FIELD["TEXT"], COND["C"], "KISTA")
     r.conditions.append(c)
     rules.append(r)
 
-    drawRules()
-    drawTransactions()
-    drawCategories()
     window.mainloop()
 
 
