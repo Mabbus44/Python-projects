@@ -239,7 +239,7 @@ def drawRules():
             lbl.bind("<Button-1>", selectRule)
             lbl.bind("<Button-3>", rightClickRule)
             popup = Menu(lbl, tearoff=0)
-            popup.add_command(label="Remove rule", command=lambda rArg=r: removeRule(r))
+            popup.add_command(label="Remove rule", command=lambda rArg=r: removeRule(rArg))
             lbl.popup = popup
             row += 1
             for c in r.conditions:
@@ -247,14 +247,26 @@ def drawRules():
                 lbl.grid(sticky=W, row=row, column=0)
                 lbl.rule = r
                 lbl.bind("<Button-1>", selectRule)
+                lbl.bind("<Button-3>", rightClickRule)
+                popup = Menu(lbl, tearoff=0)
+                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
+                lbl.popup = popup
                 lbl = Label(tab2, text=condString(c.conditionType))
                 lbl.grid(sticky=W, row=row, column=1)
                 lbl.rule = r
                 lbl.bind("<Button-1>", selectRule)
+                lbl.bind("<Button-3>", rightClickRule)
+                popup = Menu(lbl, tearoff=0)
+                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
+                lbl.popup = popup
                 lbl = Label(tab2, text=c.value)
                 lbl.grid(sticky=W, row=row, column=2)
                 lbl.rule = r
                 lbl.bind("<Button-1>", selectRule)
+                lbl.bind("<Button-3>", rightClickRule)
+                popup = Menu(lbl, tearoff=0)
+                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
+                lbl.popup = popup
                 row += 1
     btn = Button(tab2, text="+", command=addRuleButton)
     btn.grid(row=row, column=0)
