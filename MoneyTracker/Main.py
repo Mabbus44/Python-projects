@@ -62,12 +62,12 @@ def appendCategory(name, parentID):
     categories.append(Category(name, freeID, parentID))
 
 
-def deleteCategory(catID):
-    for c in categories:
+def deleteCategory(catID, catCopy):
+    for c in catCopy:
         if c.id == catID:
-            for c2 in categories:
+            for c2 in catCopy:
                 if c2.parentID == c.id:
-                    deleteCategory(c2.id)
+                    deleteCategory(c2.id, catCopy)
             categories.remove(c)
 
 
@@ -82,6 +82,23 @@ def setCatName(catID, catName):
     for c in categories:
         if c.id == catID:
             c.name = catName
+
+
+def appendRule(field=FIELD["TEXT"], cond=COND["C"], text="Type text here"):
+    catID = 0
+    if len(categories) > 0:
+        catID = categories[0].id
+    r = Rule(catID)
+    c = Condition(field, cond, text)
+    r.conditions.append(c)
+    global selectedRule
+    selectedRule = r
+    rules.append(r)
+
+
+def appendCondition(r, field=FIELD["TEXT"], cond=COND["C"], text="Type text here"):
+    c = Condition(field, cond, text)
+    r.conditions.append(c)
 
 
 def fieldString(fID):
@@ -212,11 +229,18 @@ def drawRules():
                 e.insert(0, c.value)
                 e.grid(sticky=W, row=row, column=2)
                 row += 1
+            btn = Button(tab2, text="+", command=lambda argR=r: addConditionButton(argR))
+            btn.grid(row=row, column=1)
+            row += 1
         else:
             lbl = Label(tab2, text=catFromID(r.categoryID))
             lbl.grid(sticky=W, row=row, column=0)
             lbl.rule = r
             lbl.bind("<Button-1>", selectRule)
+            lbl.bind("<Button-3>", rightClickRule)
+            popup = Menu(lbl, tearoff=0)
+            popup.add_command(label="Remove rule", command=lambda rArg=r: removeRule(r))
+            lbl.popup = popup
             row += 1
             for c in r.conditions:
                 lbl = Label(tab2, text=fieldString(c.field), padx=10)
@@ -232,6 +256,38 @@ def drawRules():
                 lbl.rule = r
                 lbl.bind("<Button-1>", selectRule)
                 row += 1
+    btn = Button(tab2, text="+", command=addRuleButton)
+    btn.grid(row=row, column=0)
+
+
+def addRuleButton():
+    appendRule()
+    drawRules()
+
+
+def addConditionButton(r):
+    appendCondition(r)
+    drawRules()
+
+
+def rightClickRule(event):
+    popup = event.widget.popup
+    try:
+        popup.tk_popup(event.x_root+60, event.y_root+13, 0)
+    finally:
+        popup.grab_release()
+
+
+def removeRule(r):
+    rules.remove(r)
+    drawRules()
+
+
+def removeCondition(r, c):
+    r.conditions.remove(c)
+    if len(r.conditions) == 0:
+        rules.remove(r)
+    drawRules()
 
 
 def selectRule(event):
@@ -340,7 +396,8 @@ def removeCategory(tree):
         answer = messagebox.askyesno("Warning!", "Do you really want to remove category '" + catFromID(catID) + "'?")
         if not answer:
             return
-        deleteCategory(catID)
+        catCopy = categories.copy()
+        deleteCategory(catID, catCopy)
         drawCategories()
 
 
