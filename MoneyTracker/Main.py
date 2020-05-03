@@ -12,6 +12,7 @@ COND = {"L": 1, "LE": 2, "E": 3, "GE": 4, "G": 5, "NE": 6, "C": 7}
 
 # Global variables
 categories = []
+accounts = []
 transactions = []
 rules = []
 window = Tk()
@@ -19,7 +20,8 @@ tab_control = ttk.Notebook(window)
 tab1 = ttk.Frame(tab_control)
 tab2 = ttk.Frame(tab_control)
 tab3 = ttk.Frame(tab_control)
-selectedRule = None
+tab4 = ttk.Frame(tab_control)
+selectedItem = None
 
 
 # Classes
@@ -53,6 +55,11 @@ class Category:
         self.id = 0
 
 
+class Account:
+    def __init__(self, name):
+        self.name = name
+
+
 # Common functions
 def tabChanged(event):
     if tab_control.tab(tab_control.select(), "text") == "Transactions":
@@ -61,6 +68,8 @@ def tabChanged(event):
         drawRules()
     if tab_control.tab(tab_control.select(), "text") == "Categories":
         drawCategories()
+    if tab_control.tab(tab_control.select(), "text") == "Accounts":
+        drawAccounts()
 
 
 def appendCategory(name, parent=None):
@@ -80,8 +89,8 @@ def appendRule(field=FIELD["TEXT"], cond=COND["C"], text="Type text here"):
     r = Rule(category)
     c = Condition(field, cond, text)
     r.conditions.append(c)
-    global selectedRule
-    selectedRule = r
+    global selectedItem
+    selectedItem = r
     rules.append(r)
 
 
@@ -129,7 +138,6 @@ def deleteAllChildren(item):
 
 # Transactions tab
 def drawTransactions():
-    print("Draw transactions")
     deleteAllChildren(tab1)
     btn = Button(tab1, text="Load file", command=loadFileButton)
     btn.grid(column=0, row=0)
@@ -141,6 +149,10 @@ def drawTransactions():
     lbl.grid(sticky=W, row=1, column=2)
     lbl = Label(tab1, text="Balance")
     lbl.grid(sticky=W, row=1, column=3)
+    lbl = Label(tab1, text="Account")
+    lbl.grid(sticky=W, row=1, column=4)
+    lbl = Label(tab1, text="Category")
+    lbl.grid(sticky=W, row=1, column=5)
     row = 2
     for t in transactions:
         lbl = Label(tab1, text=t.dateTime)
@@ -151,14 +163,19 @@ def drawTransactions():
         lbl.grid(sticky=W, row=row, column=2)
         lbl = Label(tab1, text=t.balance)
         lbl.grid(sticky=W, row=row, column=3)
+        lbl = Label(tab1, text=t.account.name if t.account else "None")
+        lbl.grid(sticky=W, row=row, column=4)
+        lbl = Label(tab1, text=t.category.name if t.category else "None")
+        lbl.grid(sticky=W, row=row, column=5)
         row += 1
 
 
 def loadFileButton():
     filename = filedialog.askopenfilename(initialdir="/", title="Select file",
                                           filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
-    loadTransactions(filename)
-    drawTransactions()
+    if filename:
+        loadTransactions(filename)
+        drawTransactions()
 
 
 def loadTransactions(fileName):
@@ -182,11 +199,10 @@ def loadTransactions(fileName):
 
 # Rules tab
 def drawRules():
-    print("Draw rules")
     deleteAllChildren(tab2)
     row = 0
     for r in rules:
-        if r == selectedRule:
+        if r == selectedItem:
             categoriesTextList = []
             selectedIndex = 0
             for c in categories:
@@ -307,9 +323,9 @@ def removeCondition(r, c):
 
 
 def selectRule(event):
-    global selectedRule
-    if selectedRule != event.widget.rule:
-        selectedRule = event.widget.rule
+    global selectedItem
+    if selectedItem != event.widget.rule:
+        selectedItem = event.widget.rule
         drawRules()
 
 
@@ -430,6 +446,66 @@ def removeCategory(tree):
             return
 
 
+# Accounts tab
+def drawAccounts():
+    deleteAllChildren(tab4)
+    row = 0
+    for a in accounts:
+        if a == selectedItem:
+            sv = StringVar()
+            sv.account = a
+            sv.trace("w", lambda name, index, mode, svArg=sv: accountNameChanged(svArg))
+            e = Entry(tab4, textvariable=sv)
+            e.insert(0, a.name)
+            e.grid(sticky=W, row=row, column=0)
+            e.bind("<Button-3>", rightClickAccount)
+            popup = Menu(e, tearoff=0)
+            popup.add_command(label="Remove account", command=lambda aArg=a: removeAccount(aArg))
+            e.popup = popup
+            row += 1
+        else:
+            lbl = Label(tab4, text=a.name)
+            lbl.grid(sticky=W, row=row, column=0)
+            lbl.account = a
+            lbl.bind("<Button-1>", selectAccount)
+            lbl.bind("<Button-3>", rightClickAccount)
+            popup = Menu(lbl, tearoff=0)
+            popup.add_command(label="Remove account", command=lambda aArg=a: removeAccount(aArg))
+            lbl.popup = popup
+            row += 1
+    btn = Button(tab4, text="+", command=addAccountButton)
+    btn.grid(row=row, column=0)
+
+
+def addAccountButton():
+    accounts.append(Account("new"))
+    drawAccounts()
+
+
+def rightClickAccount(event):
+    popup = event.widget.popup
+    try:
+        popup.tk_popup(event.x_root+60, event.y_root+13, 0)
+    finally:
+        popup.grab_release()
+
+
+def removeAccount(a):
+    rules.remove(a)
+    drawAccounts()
+
+
+def selectAccount(event):
+    global selectedItem
+    if selectedItem != event.widget.account:
+        selectedItem = event.widget.account
+        drawAccounts()
+
+
+def accountNameChanged(sv):
+    sv.account.name = sv.get()
+
+
 # Main
 def main():
     window.title("Money tracker")
@@ -437,6 +513,7 @@ def main():
     tab_control.add(tab1, text="Transactions")
     tab_control.add(tab2, text="Rules")
     tab_control.add(tab3, text="Categories")
+    tab_control.add(tab4, text="Accounts")
     tab_control.pack(expand=1, fill="both")
     tab_control.bind("<<NotebookTabChanged>>", lambda event: tabChanged(event))
 
@@ -461,8 +538,6 @@ def main():
     r.conditions.append(c)
     c = Condition(FIELD["AMOUNT"], COND["G"], 100)
     r.conditions.append(c)
-    global selectedRule
-    selectedRule = r
     rules.append(r)
 
     r = Rule(categories[1])
