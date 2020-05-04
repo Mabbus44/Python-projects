@@ -16,11 +16,11 @@ accounts = []
 transactions = []
 rules = []
 window = Tk()
-tab_control = ttk.Notebook(window)
-tab1 = ttk.Frame(tab_control)
-tab2 = ttk.Frame(tab_control)
-tab3 = ttk.Frame(tab_control)
-tab4 = ttk.Frame(tab_control)
+tabControl = ttk.Notebook(window)
+tab1 = ttk.Frame(tabControl)
+tab2 = ttk.Frame(tabControl)
+tab3 = ttk.Frame(tabControl)
+tab4 = ttk.Frame(tabControl)
 selectedItem = None
 
 
@@ -62,14 +62,14 @@ class Account:
 
 # Common functions
 def tabChanged(event):
-    if tab_control.tab(tab_control.select(), "text") == "Transactions":
+    if tabControl.tab(tabControl.select(), "text") == "Transactions":
         drawTransactions()
-    if tab_control.tab(tab_control.select(), "text") == "Rules":
+    if tabControl.tab(tabControl.select(), "text") == "Rules":
         drawRules()
-    if tab_control.tab(tab_control.select(), "text") == "Categories":
+    if tabControl.tab(tabControl.select(), "text") == "Categories":
         drawCategories()
-    if tab_control.tab(tab_control.select(), "text") == "Accounts":
-        drawAccounts()
+    if tabControl.tab(tabControl.select(), "text") == "Accounts":
+        drawAccounts(tab4)
 
 
 def appendCategory(name, parent=None):
@@ -191,6 +191,21 @@ def loadTransactions(fileName):
     amountID = 3
     balanceID = 4
     maxID = max(dateID, textID, amountID, balanceID)
+
+    window2 = Toplevel()
+    print("Grab set")
+    window2.grab_set()
+    window2.title("Accounts")
+    window2.geometry("500x400")
+    popupFrame = ttk.Frame(window2)
+    popupFrame.pack()
+    drawAccounts(popupFrame)
+    print("Window 2 mainloop")
+    #window2.mainloop()
+    print("grab release")
+    #window2.grab_release()
+    print("Done")
+
     transactions.clear()
     for row in cols:
         if maxID <= len(row)-1:
@@ -447,39 +462,39 @@ def removeCategory(tree):
 
 
 # Accounts tab
-def drawAccounts():
-    deleteAllChildren(tab4)
+def drawAccounts(frame):
+    deleteAllChildren(frame)
     row = 0
     for a in accounts:
         if a == selectedItem:
             sv = StringVar()
             sv.account = a
             sv.trace("w", lambda name, index, mode, svArg=sv: accountNameChanged(svArg))
-            e = Entry(tab4, textvariable=sv)
+            e = Entry(frame, textvariable=sv)
             e.insert(0, a.name)
             e.grid(sticky=W, row=row, column=0)
             e.bind("<Button-3>", rightClickAccount)
             popup = Menu(e, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda aArg=a: removeAccount(aArg))
+            popup.add_command(label="Remove account", command=lambda f=frame, aArg=a: removeAccount(f, aArg))
             e.popup = popup
             row += 1
         else:
-            lbl = Label(tab4, text=a.name)
+            lbl = Label(frame, text=a.name)
             lbl.grid(sticky=W, row=row, column=0)
             lbl.account = a
-            lbl.bind("<Button-1>", selectAccount)
+            lbl.bind("<Button-1>", lambda event, f=frame: selectAccount(f, event))
             lbl.bind("<Button-3>", rightClickAccount)
             popup = Menu(lbl, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda aArg=a: removeAccount(aArg))
+            popup.add_command(label="Remove account", command=lambda f=frame, aArg=a: removeAccount(f, aArg))
             lbl.popup = popup
             row += 1
-    btn = Button(tab4, text="+", command=addAccountButton)
+    btn = Button(frame, text="+", command=lambda f=frame: addAccountButton(f))
     btn.grid(row=row, column=0)
 
 
-def addAccountButton():
+def addAccountButton(frame):
     accounts.append(Account("new"))
-    drawAccounts()
+    drawAccounts(frame)
 
 
 def rightClickAccount(event):
@@ -490,16 +505,16 @@ def rightClickAccount(event):
         popup.grab_release()
 
 
-def removeAccount(a):
-    rules.remove(a)
-    drawAccounts()
+def removeAccount(frame, a):
+    accounts.remove(a)
+    drawAccounts(frame)
 
 
-def selectAccount(event):
+def selectAccount(frame, event):
     global selectedItem
     if selectedItem != event.widget.account:
         selectedItem = event.widget.account
-        drawAccounts()
+        drawAccounts(frame)
 
 
 def accountNameChanged(sv):
@@ -510,12 +525,12 @@ def accountNameChanged(sv):
 def main():
     window.title("Money tracker")
     window.geometry("920x800")
-    tab_control.add(tab1, text="Transactions")
-    tab_control.add(tab2, text="Rules")
-    tab_control.add(tab3, text="Categories")
-    tab_control.add(tab4, text="Accounts")
-    tab_control.pack(expand=1, fill="both")
-    tab_control.bind("<<NotebookTabChanged>>", lambda event: tabChanged(event))
+    tabControl.add(tab1, text="Transactions")
+    tabControl.add(tab2, text="Rules")
+    tabControl.add(tab3, text="Categories")
+    tabControl.add(tab4, text="Accounts")
+    tabControl.pack(expand=1, fill="both")
+    tabControl.bind("<<NotebookTabChanged>>", lambda event: tabChanged(event))
 
     categories.append(Category("Bil", None))
     categories.append(Category("Mat", None))
