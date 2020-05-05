@@ -3,7 +3,8 @@ from tkinter import messagebox
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import *
-
+from datetime import datetime
+import codecs
 
 # Constants
 FIELD = {"DATETIME": 1, "TEXT": 2, "AMOUNT": 3}
@@ -17,11 +18,40 @@ transactions = []
 rules = []
 window = Tk()
 tabControl = ttk.Notebook(window)
-tab1 = ttk.Frame(tabControl)
-tab2 = ttk.Frame(tabControl)
-tab3 = ttk.Frame(tabControl)
-tab4 = ttk.Frame(tabControl)
+outerFrame1 = ttk.Frame(tabControl)
+canvas1 = Canvas(outerFrame1)
+scrollbar1 = ttk.Scrollbar(outerFrame1, orient="vertical", command=canvas1.yview)
+tab1 = ttk.Frame(canvas1)
+canvas1.create_window((0, 0), window=tab1, anchor="nw")
+canvas1.configure(yscrollcommand=scrollbar1.set)
+tab1.bind("<Configure>", lambda e: canvas1.configure(scrollregion=canvas1.bbox("all")))
+
+outerFrame2 = ttk.Frame(tabControl)
+canvas2 = Canvas(outerFrame2)
+scrollbar2 = ttk.Scrollbar(outerFrame2, orient="vertical", command=canvas2.yview)
+tab2 = ttk.Frame(canvas2)
+canvas2.create_window((0, 0), window=tab2, anchor="nw")
+canvas2.configure(yscrollcommand=scrollbar2.set)
+tab2.bind("<Configure>", lambda e: canvas2.configure(scrollregion=canvas2.bbox("all")))
+
+outerFrame3 = ttk.Frame(tabControl)
+canvas3 = Canvas(outerFrame3)
+scrollbar3 = ttk.Scrollbar(outerFrame3, orient="vertical", command=canvas3.yview)
+tab3 = ttk.Frame(canvas3)
+canvas3.create_window((0, 0), window=tab3, anchor="nw")
+canvas3.configure(yscrollcommand=scrollbar3.set)
+tab3.bind("<Configure>", lambda e: canvas3.configure(scrollregion=canvas3.bbox("all")))
+
+outerFrame4 = ttk.Frame(tabControl)
+canvas4 = Canvas(outerFrame4)
+scrollbar4 = ttk.Scrollbar(outerFrame4, orient="vertical", command=canvas4.yview)
+tab4 = ttk.Frame(canvas4)
+canvas4.create_window((0, 0), window=tab4, anchor="nw")
+canvas4.configure(yscrollcommand=scrollbar4.set)
+tab4.bind("<Configure>", lambda e: canvas4.configure(scrollregion=canvas4.bbox("all")))
+
 selectedItem = None
+decimalSeparator = ","
 
 
 # Classes
@@ -136,11 +166,33 @@ def deleteAllChildren(item):
         i.destroy()
 
 
+def str2float(string):
+    newString = ""
+    signFound = False
+    firstNumberFound = False
+    commaFound = False
+    for c in string:
+        if not signFound and not firstNumberFound:
+            if c in "+-":
+                newString = newString + c
+                signFound = True
+        if c in "0123456789":
+            newString = newString + c
+            firstNumberFound = True
+        if not commaFound and firstNumberFound:
+            if c in decimalSeparator:
+                newString = newString + "."
+                commaFound = True
+    return float(newString)
+
+
 # Transactions tab
 def drawTransactions():
     deleteAllChildren(tab1)
     btn = Button(tab1, text="Load file", command=loadFileButton)
     btn.grid(column=0, row=0)
+    btn = Button(tab1, text="Apply rules", command=applyRulesButton)
+    btn.grid(column=1, row=0)
     lbl = Label(tab1, text="Date")
     lbl.grid(sticky=W, row=1, column=0)
     lbl = Label(tab1, text="Text")
@@ -175,18 +227,55 @@ def loadFileButton():
                                           filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
     if filename:
         popup = Toplevel()
-        print("Grab set")
         popup.grab_set()
         popup.title("Accounts")
         popup.geometry("500x400")
         popupFrame = ttk.Frame(popup)
         popupFrame.pack()
-        drawAccountsPopup(popup, popupFrame, loadTransactions, filename)
-        drawTransactions()
+        drawAccountsPopup(popupFrame, popup, loadTransactions, filename)
 
 
-def loadTransactions(fileName):
-    f = open(fileName, "r")
+def applyRulesButton():
+    for t in transactions:
+        if not t.category:
+            for r in rules:
+                ruleApplies = True
+                for c in r.conditions:
+                    field = 0
+                    if c.field == FIELD["DATETIME"]:
+                        field = t.dateTime
+                    if c.field == FIELD["TEXT"]:
+                        field = t.text
+                    if c.field == FIELD["AMOUNT"]:
+                        field = t.amount
+                    if c.conditionType == COND["L"]:
+                        if not(field < c.value):
+                            ruleApplies = False
+                    if c.conditionType == COND["LE"]:
+                        if not(field <= c.value):
+                            ruleApplies = False
+                    if c.conditionType == COND["E"]:
+                        if not(field == c.value):
+                            ruleApplies = False
+                    if c.conditionType == COND["GE"]:
+                        if not(field >= c.value):
+                            ruleApplies = False
+                    if c.conditionType == COND["G"]:
+                        if not(field > c.value):
+                            ruleApplies = False
+                    if c.conditionType == COND["NE"]:
+                        if not(field != c.value):
+                            ruleApplies = False
+                    if c.conditionType == COND["C"]:
+                        if not(c.value.lower() in field.lower()):
+                            ruleApplies = False
+                if ruleApplies:
+                    t.category = r.category
+    drawTransactions()
+
+
+def loadTransactions(fileName, account):
+    f = codecs.open(fileName, 'r', encoding='utf8')
     rows = f.read().split("\n")
     f.close()
     cols = []
@@ -198,10 +287,10 @@ def loadTransactions(fileName):
     amountID = 3
     balanceID = 4
     maxID = max(dateID, textID, amountID, balanceID)
-    transactions.clear()
     for row in cols:
         if maxID <= len(row)-1:
-            transactions.append(Transaction(row[dateID], row[textID], row[amountID], row[balanceID], None, None))
+            transactions.append(Transaction(datetime.strptime(row[dateID], "%Y-%m-%d").date(), row[textID], str2float(row[amountID]),
+                                            str2float(row[balanceID]), account, None))
 
 
 # Rules tab
@@ -467,28 +556,28 @@ def drawAccounts(frame):
             e.grid(sticky=W, row=row, column=0)
             e.bind("<Button-3>", rightClickAccount)
             popup = Menu(e, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda d=drawAccounts, f=frame, aArg=a:
-                              removeAccount(d, f, aArg))
+            popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
+                              removeAccount(f, aArg))
             e.popup = popup
             row += 1
         else:
             lbl = Label(frame, text=a.name)
             lbl.grid(sticky=W, row=row, column=0)
             lbl.account = a
-            lbl.bind("<Button-1>", lambda event, d=drawAccounts, f=frame: selectAccount(d, f, event))
+            lbl.bind("<Button-1>", lambda event, f=frame: selectAccount(f, event))
             lbl.bind("<Button-3>", rightClickAccount)
             popup = Menu(lbl, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda d=drawAccounts, f=frame, aArg=a:
-                              removeAccount(d, f, aArg))
+            popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
+                              removeAccount(f, aArg))
             lbl.popup = popup
             row += 1
-    btn = Button(frame, text="+", command=lambda d=drawAccounts, f=frame: addAccountButton(d, f))
+    btn = Button(frame, text="+", command=lambda f=frame: addAccountButton(f))
     btn.grid(row=row, column=0)
 
 
-def addAccountButton(drawFunc, frame):
+def addAccountButton(frame):
     accounts.append(Account("new"))
-    drawFunc(frame)
+    drawAccounts(frame)
 
 
 def rightClickAccount(event):
@@ -499,16 +588,16 @@ def rightClickAccount(event):
         popup.grab_release()
 
 
-def removeAccount(drawFunc, frame, a):
+def removeAccount(frame, a):
     accounts.remove(a)
-    drawFunc(frame)
+    drawAccounts(frame)
 
 
-def selectAccount(drawFunc, frame, event):
+def selectAccount(frame, event):
     global selectedItem
     if selectedItem != event.widget.account:
         selectedItem = event.widget.account
-        drawFunc(frame)
+        drawAccounts(frame)
 
 
 def accountNameChanged(sv):
@@ -523,67 +612,98 @@ def drawAccountsPopup(frame, popup, func, filename):
         if a == selectedItem:
             sv = StringVar()
             sv.account = a
-            sv.trace("w", lambda name, index, mode, svArg=sv: accountNameChanged(svArg))
+            sv.trace("w", lambda name, index, mode, svArg=sv: accountNameChanged2(svArg))
             e = Entry(frame, textvariable=sv)
             e.insert(0, a.name)
             e.grid(sticky=W, row=row, column=0)
-            e.bind("<Button-3>", rightClickAccount)
-            popup = Menu(e, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda d=drawAccountsPopup, f=frame, aArg=a:
-                              removeAccount(d, f, aArg))
-            e.popup = popup
+            e.bind("<Button-3>", rightClickAccount2)
+            popupR = Menu(e, tearoff=0)
+            popupR.add_command(label="Remove account", command=lambda f=frame, aArg=a, p=popup, fu=func,
+                              fi=filename: removeAccount2(f, aArg, p, fu, fi))
+            e.popup = popupR
             row += 1
         else:
             lbl = Label(frame, text=a.name)
             lbl.grid(sticky=W, row=row, column=0)
             lbl.account = a
-            lbl.bind("<Button-1>", lambda event, d=drawAccountsPopup, f=frame: selectAccount(d, f, event))
-            lbl.bind("<Button-3>", rightClickAccount)
-            popup = Menu(lbl, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda d=drawAccountsPopup, f=frame, aArg=a:
-                              removeAccount(d, f, aArg))
-            lbl.popup = popup
+            lbl.bind("<Button-1>", lambda event, f=frame, p=popup, fu=func, fi=filename:
+                    selectAccount2(f, event, p, fu, fi))
+            lbl.bind("<Button-3>", rightClickAccount2)
+            popupR = Menu(lbl, tearoff=0)
+            popupR.add_command(label="Remove account", command=lambda f=frame, aArg=a, p=popup, fu=func, fi=filename:
+                               removeAccount2(f, aArg, p, fu, fi))
+            lbl.popup = popupR
             row += 1
-    btn = Button(frame, text="+", command=lambda d=drawAccountsPopup, f=frame: addAccountButton(d, f))
+    btn = Button(frame, text="+", command=lambda f=frame, p=popup, fu=func, fi=filename:
+                 addAccountButton2(f, p, fu, fi))
     btn.grid(row=row, column=0)
     btn = Button(frame, text="Select", command=lambda argPopup=popup, argFunc=func, argFilename=filename:
                  selectAccountInPopup(argPopup, argFunc, argFilename))
     btn.grid(row=row+1, column=0)
-    btn = Button(frame, text="Cancel", command=lambda: popup.destroy())
+    btn = Button(frame, text="Cancel", command=popup.destroy)
     btn.grid(row=row+1, column=1)
 
 
+def addAccountButton2(frame, popup, func, filename):
+    accounts.append(Account("new"))
+    drawAccountsPopup(frame, popup, func, filename)
+
+
+def rightClickAccount2(event):
+    popup = event.widget.popup
+    try:
+        popup.tk_popup(event.x_root+60, event.y_root+13, 0)
+    finally:
+        popup.grab_release()
+
+
+def removeAccount2(frame, a, popup, func, filename):
+    accounts.remove(a)
+    drawAccountsPopup(frame, popup, func, filename)
+
+
+def selectAccount2(frame, event, popup, func, filename):
+    global selectedItem
+    if selectedItem != event.widget.account:
+        selectedItem = event.widget.account
+        drawAccountsPopup(frame, popup, func, filename)
+
+
+def accountNameChanged2(sv):
+    sv.account.name = sv.get()
+
+
 def selectAccountInPopup(popup, func, filename):
-    func(filename)
-    popup.destroy()
+    if selectedItem in accounts:
+        func(filename, selectedItem)
+        popup.destroy()
+        drawTransactions()
 
 
 # Main
 def main():
     window.title("Money tracker")
     window.geometry("920x800")
-    tabControl.add(tab1, text="Transactions")
-    tabControl.add(tab2, text="Rules")
-    tabControl.add(tab3, text="Categories")
-    tabControl.add(tab4, text="Accounts")
+    tabControl.add(outerFrame1, text="Transactions")
+    tabControl.add(outerFrame2, text="Rules")
+    tabControl.add(outerFrame3, text="Categories")
+    tabControl.add(outerFrame4, text="Accounts")
     tabControl.pack(expand=1, fill="both")
     tabControl.bind("<<NotebookTabChanged>>", lambda event: tabChanged(event))
+
+    canvas1.pack(side="left", fill="both", expand=True)
+    scrollbar1.pack(side="right", fill="y")
+    canvas2.pack(side="left", fill="both", expand=True)
+    scrollbar2.pack(side="right", fill="y")
+    canvas3.pack(side="left", fill="both", expand=True)
+    scrollbar3.pack(side="right", fill="y")
+    canvas4.pack(side="left", fill="both", expand=True)
+    scrollbar4.pack(side="right", fill="y")
 
     categories.append(Category("Bil", None))
     categories.append(Category("Mat", None))
     categories.append(Category("Service", categories[0]))
-    categories.append(Category("Cat4", None))
-    categories.append(Category("Cat5", categories[3]))
-    categories.append(Category("Cat6", categories[3]))
-    categories.append(Category("Cat7", categories[3]))
-    categories.append(Category("Cat8", categories[4]))
-    categories.append(Category("Cat9", categories[4]))
-    categories.append(Category("Cat10", categories[7]))
-    categories.append(Category("Cat11", categories[7]))
-    categories.append(Category("Cat12", categories[8]))
-    categories.append(Category("Cat13", categories[5]))
-    categories.append(Category("Cat14", categories[6]))
-    categories.append(Category("Cat15", categories[8]))
+    categories.append(Category("Hyra", None))
 
     r = Rule(categories[0])
     c = Condition(FIELD["TEXT"], COND["C"], "CIRCLE")
@@ -601,6 +721,14 @@ def main():
     c = Condition(FIELD["TEXT"], COND["C"], "KISTA")
     r.conditions.append(c)
     rules.append(r)
+
+    r = Rule(categories[3])
+    c = Condition(FIELD["TEXT"], COND["C"], "Fastum")
+    r.conditions.append(c)
+    rules.append(r)
+
+    accounts.append(Account("Rasmus lönekonto"))
+    accounts.append(Account("Räkningskonto"))
 
     window.mainloop()
 
