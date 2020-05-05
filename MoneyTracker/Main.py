@@ -174,7 +174,14 @@ def loadFileButton():
     filename = filedialog.askopenfilename(initialdir="/", title="Select file",
                                           filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
     if filename:
-        loadTransactions(filename)
+        popup = Toplevel()
+        print("Grab set")
+        popup.grab_set()
+        popup.title("Accounts")
+        popup.geometry("500x400")
+        popupFrame = ttk.Frame(popup)
+        popupFrame.pack()
+        drawAccountsPopup(popup, popupFrame, loadTransactions, filename)
         drawTransactions()
 
 
@@ -191,21 +198,6 @@ def loadTransactions(fileName):
     amountID = 3
     balanceID = 4
     maxID = max(dateID, textID, amountID, balanceID)
-
-    window2 = Toplevel()
-    print("Grab set")
-    window2.grab_set()
-    window2.title("Accounts")
-    window2.geometry("500x400")
-    popupFrame = ttk.Frame(window2)
-    popupFrame.pack()
-    drawAccounts(popupFrame)
-    print("Window 2 mainloop")
-    #window2.mainloop()
-    print("grab release")
-    #window2.grab_release()
-    print("Done")
-
     transactions.clear()
     for row in cols:
         if maxID <= len(row)-1:
@@ -475,26 +467,28 @@ def drawAccounts(frame):
             e.grid(sticky=W, row=row, column=0)
             e.bind("<Button-3>", rightClickAccount)
             popup = Menu(e, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda f=frame, aArg=a: removeAccount(f, aArg))
+            popup.add_command(label="Remove account", command=lambda d=drawAccounts, f=frame, aArg=a:
+                              removeAccount(d, f, aArg))
             e.popup = popup
             row += 1
         else:
             lbl = Label(frame, text=a.name)
             lbl.grid(sticky=W, row=row, column=0)
             lbl.account = a
-            lbl.bind("<Button-1>", lambda event, f=frame: selectAccount(f, event))
+            lbl.bind("<Button-1>", lambda event, d=drawAccounts, f=frame: selectAccount(d, f, event))
             lbl.bind("<Button-3>", rightClickAccount)
             popup = Menu(lbl, tearoff=0)
-            popup.add_command(label="Remove account", command=lambda f=frame, aArg=a: removeAccount(f, aArg))
+            popup.add_command(label="Remove account", command=lambda d=drawAccounts, f=frame, aArg=a:
+                              removeAccount(d, f, aArg))
             lbl.popup = popup
             row += 1
-    btn = Button(frame, text="+", command=lambda f=frame: addAccountButton(f))
+    btn = Button(frame, text="+", command=lambda d=drawAccounts, f=frame: addAccountButton(d, f))
     btn.grid(row=row, column=0)
 
 
-def addAccountButton(frame):
+def addAccountButton(drawFunc, frame):
     accounts.append(Account("new"))
-    drawAccounts(frame)
+    drawFunc(frame)
 
 
 def rightClickAccount(event):
@@ -505,20 +499,63 @@ def rightClickAccount(event):
         popup.grab_release()
 
 
-def removeAccount(frame, a):
+def removeAccount(drawFunc, frame, a):
     accounts.remove(a)
-    drawAccounts(frame)
+    drawFunc(frame)
 
 
-def selectAccount(frame, event):
+def selectAccount(drawFunc, frame, event):
     global selectedItem
     if selectedItem != event.widget.account:
         selectedItem = event.widget.account
-        drawAccounts(frame)
+        drawFunc(frame)
 
 
 def accountNameChanged(sv):
     sv.account.name = sv.get()
+
+
+# Popups
+def drawAccountsPopup(frame, popup, func, filename):
+    deleteAllChildren(frame)
+    row = 0
+    for a in accounts:
+        if a == selectedItem:
+            sv = StringVar()
+            sv.account = a
+            sv.trace("w", lambda name, index, mode, svArg=sv: accountNameChanged(svArg))
+            e = Entry(frame, textvariable=sv)
+            e.insert(0, a.name)
+            e.grid(sticky=W, row=row, column=0)
+            e.bind("<Button-3>", rightClickAccount)
+            popup = Menu(e, tearoff=0)
+            popup.add_command(label="Remove account", command=lambda d=drawAccountsPopup, f=frame, aArg=a:
+                              removeAccount(d, f, aArg))
+            e.popup = popup
+            row += 1
+        else:
+            lbl = Label(frame, text=a.name)
+            lbl.grid(sticky=W, row=row, column=0)
+            lbl.account = a
+            lbl.bind("<Button-1>", lambda event, d=drawAccountsPopup, f=frame: selectAccount(d, f, event))
+            lbl.bind("<Button-3>", rightClickAccount)
+            popup = Menu(lbl, tearoff=0)
+            popup.add_command(label="Remove account", command=lambda d=drawAccountsPopup, f=frame, aArg=a:
+                              removeAccount(d, f, aArg))
+            lbl.popup = popup
+            row += 1
+    btn = Button(frame, text="+", command=lambda d=drawAccountsPopup, f=frame: addAccountButton(d, f))
+    btn.grid(row=row, column=0)
+    btn = Button(frame, text="Select", command=lambda argPopup=popup, argFunc=func, argFilename=filename:
+                 selectAccountInPopup(argPopup, argFunc, argFilename))
+    btn.grid(row=row+1, column=0)
+    btn = Button(frame, text="Cancel", command=lambda: popup.destroy())
+    btn.grid(row=row+1, column=1)
+
+
+def selectAccountInPopup(popup, func, filename):
+    func(filename)
+    popup.destroy()
 
 
 # Main

@@ -10,6 +10,13 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
@@ -24,7 +31,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.Main">
     <configuration name="Main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MoneyTracker" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -46,9 +53,31 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="MoneyTracker" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.Main" />
+        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -95,42 +124,42 @@
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
     <state x="294" y="159" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1010@0.0.1680.1010" timestamp="1587991638731" />
-    <state width="1659" height="272" key="GridCell.Tab.0.bottom" timestamp="1588600526532">
+    <state width="1659" height="336" key="GridCell.Tab.0.bottom" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1588600526532" />
-    <state width="1659" height="272" key="GridCell.Tab.0.center" timestamp="1588600526532">
+    <state width="1659" height="336" key="GridCell.Tab.0.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state width="1659" height="336" key="GridCell.Tab.0.center" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.center/0.0.1680.1010@0.0.1680.1010" timestamp="1588600526532" />
-    <state width="1659" height="272" key="GridCell.Tab.0.left" timestamp="1588600526532">
+    <state width="1659" height="336" key="GridCell.Tab.0.center/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state width="1659" height="336" key="GridCell.Tab.0.left" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.left/0.0.1680.1010@0.0.1680.1010" timestamp="1588600526532" />
-    <state width="1659" height="272" key="GridCell.Tab.0.right" timestamp="1588600526532">
+    <state width="1659" height="336" key="GridCell.Tab.0.left/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state width="1659" height="336" key="GridCell.Tab.0.right" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="272" key="GridCell.Tab.0.right/0.0.1680.1010@0.0.1680.1010" timestamp="1588600526532" />
-    <state width="1659" height="336" key="GridCell.Tab.1.bottom" timestamp="1588514889956">
+    <state width="1659" height="336" key="GridCell.Tab.0.right/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state width="1659" height="336" key="GridCell.Tab.1.bottom" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="336" key="GridCell.Tab.1.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1588514889956" />
-    <state width="1659" height="336" key="GridCell.Tab.1.center" timestamp="1588514889955">
+    <state width="1659" height="336" key="GridCell.Tab.1.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state width="1659" height="336" key="GridCell.Tab.1.center" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="336" key="GridCell.Tab.1.center/0.0.1680.1010@0.0.1680.1010" timestamp="1588514889955" />
-    <state width="1659" height="336" key="GridCell.Tab.1.left" timestamp="1588514889954">
+    <state width="1659" height="336" key="GridCell.Tab.1.center/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state width="1659" height="336" key="GridCell.Tab.1.left" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="336" key="GridCell.Tab.1.left/0.0.1680.1010@0.0.1680.1010" timestamp="1588514889954" />
-    <state width="1659" height="336" key="GridCell.Tab.1.right" timestamp="1588514889956">
+    <state width="1659" height="336" key="GridCell.Tab.1.left/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state width="1659" height="336" key="GridCell.Tab.1.right" timestamp="1588683755098">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state width="1659" height="336" key="GridCell.Tab.1.right/0.0.1680.1010@0.0.1680.1010" timestamp="1588514889956" />
-    <state x="536" y="328" key="com.intellij.ide.util.TipDialog" timestamp="1588594876457">
+    <state width="1659" height="336" key="GridCell.Tab.1.right/0.0.1680.1010@0.0.1680.1010" timestamp="1588683755098" />
+    <state x="536" y="328" key="com.intellij.ide.util.TipDialog" timestamp="1588679582845">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
-    <state x="536" y="328" key="com.intellij.ide.util.TipDialog/0.0.1680.1010@0.0.1680.1010" timestamp="1588594876457" />
+    <state x="536" y="328" key="com.intellij.ide.util.TipDialog/0.0.1680.1010@0.0.1680.1010" timestamp="1588679582845" />
     <state x="503" y="217" width="672" height="678" key="search.everywhere.popup" timestamp="1588595532706">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
@@ -141,7 +170,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>542</line>
+          <line>579</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
