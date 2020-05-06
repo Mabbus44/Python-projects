@@ -194,7 +194,10 @@ def str2float(string):
             if c in decimalSeparator:
                 newString = newString + "."
                 commaFound = True
-    return float(newString)
+    if firstNumberFound:
+        return float(newString)
+    else:
+        return 0.0
 
 
 def str2int(string):
@@ -209,7 +212,10 @@ def str2int(string):
         if c in "0123456789":
             newString = newString + c
             firstNumberFound = True
-    return int(newString)
+    if firstNumberFound:
+        return int(newString)
+    else:
+        return 0
 
 
 def newProject():
@@ -251,56 +257,41 @@ def openProject():
             categories.append(Category(categoryName, parentID))
         for c in categories:
             if c.parent > 0:
-                c.parent = c[c.parent-1]
+                c.parent = categories[c.parent-1]
             else:
                 c.parent = None
-
         transactionsCount = str2int(f.readline())
         for i in range(transactionsCount):
             transDate = datetime.strptime(f.readline()[:-1], "%Y-%m-%d").date()
             transText = f.readline()[:-1]
             transAmount = str2float(f.readline().replace(".", decimalSeparator).replace(",", decimalSeparator))
             transBalance = str2float(f.readline().replace(".", decimalSeparator).replace(",", decimalSeparator))
-            transAccount = str2int(f.readline())
-            transCategory = str2int(f.readline())
-            transactions.append(Transaction(transDate, transText, transAmount, transBalance, accountID)
-        for c in categories:
-            if c.parent > 0:
-                c.parent = c[c.parent-1]
-            else:
-                c.parent = None
-
-
-#        f.write("Transactions: " + str(len(transactions)) + "\n")
-#        for t in transactions:
-#            f.write(str(t.dateTime) + "\n")
-#            f.write(t.text + "\n")
-#            f.write(str(t.amount) + "\n")
-#            f.write(str(t.balance) + "\n")
-#            if t.account:
-#                f.write(str(t.account.id) + "\n")
-#            else:
-#                f.write("0" + "\n")
-#            if t.category:
-#                f.write(str(t.category.id) + "\n")
-#            else:
-#                f.write("0" + "\n")
-#        f.write("Rules: " + str(len(rules)) + "\n")
-#        for r in rules:
-#            f.write(str(r.category.id) + "\n")
-#            f.write("Conditions: " + str(len(r.conditions)) + "\n")
-#            for c in r.conditions:
-#                f.write(str(c.field) + "\n")
-#                f.write(str(c.conditionType) + "\n")
-#                f.write(str(c.value) + "\n")
+            aID = str2int(f.readline())
+            transAccount = accounts[aID-1] if aID > 0 else None
+            cID = str2int(f.readline())
+            transCategory = categories[cID-1] if cID > 0 else None
+            transactions.append(Transaction(transDate, transText, transAmount, transBalance, transAccount,
+                                            transCategory))
+        rulesCount = str2int(f.readline())
+        for i in range(rulesCount):
+            rules.append(Rule(categories[str2int(f.readline())-1]))
+            conditionsCount = str2int(f.readline())
+            for i2 in range(conditionsCount):
+                field = str2int(f.readline())
+                conditionType = str2int(f.readline())
+                if field == FIELD["DATETIME"]:
+                    value = datetime.strptime(f.readline()[:-1], "%Y-%m-%d").date()
+                if field == FIELD["TEXT"]:
+                    value = f.readline()[:-1]
+                if field == FIELD["AMOUNT"]:
+                    value = str2int(f.readline())
+                rules[i].conditions.append(Condition(field, conditionType, value))
         f.close()
-        messagebox.showinfo("Into", "File loaded successfully")
+        messagebox.showinfo("Info", "File loaded successfully")
         drawTransactions()
         drawRules()
         drawCategories()
         drawAccounts(tab4)
-    else:
-        messagebox.showwarning("Warning", "File not saved")
 
 
 def saveProject():
@@ -309,7 +300,7 @@ def saveProject():
                                             defaultextension=".mtp")
     if fileName:
         f = codecs.open(fileName, 'w', encoding='utf8')
-        f.write("File structure version: " + 1.0 + "\n")
+        f.write("File structure version: " + str(1.0) + "\n")
         for i in range(len(accounts)):
             accounts[i].id = i+1
         for i in range(len(categories)):
@@ -348,8 +339,6 @@ def saveProject():
                 f.write(str(c.value) + "\n")
         f.close()
         messagebox.showinfo("Info", "File saved successfully")
-    else:
-        messagebox.showwarning("Warning", "File not saved")
 
 
 # Transactions tab
