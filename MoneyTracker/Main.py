@@ -64,6 +64,12 @@ class Transaction:
         self.account = account
         self.category = category
 
+    def equals(self, other):
+        if (self.dateTime == other.dateTime and self.text == other.text and self.amount == other.amount and
+                self.balance == other.balance):
+            return True
+        return False
+
 
 class Rule:
     def __init__(self, category):
@@ -287,10 +293,17 @@ def loadTransactions(fileName, account):
     amountID = 3
     balanceID = 4
     maxID = max(dateID, textID, amountID, balanceID)
+    originalLen = len(transactions)
     for row in cols:
         if maxID <= len(row)-1:
-            transactions.append(Transaction(datetime.strptime(row[dateID], "%Y-%m-%d").date(), row[textID], str2float(row[amountID]),
-                                            str2float(row[balanceID]), account, None))
+            newTransaction = Transaction(datetime.strptime(row[dateID], "%Y-%m-%d").date(), row[textID],
+                                         str2float(row[amountID]), str2float(row[balanceID]), account, None)
+            duplication = False
+            for i in range(originalLen):
+                if transactions[i].equals(newTransaction):
+                    duplication = True
+            if not duplication:
+                transactions.append(newTransaction)
 
 
 # Rules tab
