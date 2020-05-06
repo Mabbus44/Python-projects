@@ -246,14 +246,31 @@ def openProject():
             accounts.append(Account(f.readline()[:-1]))
         categoriesCount = str2int(f.readline())
         for i in range(categoriesCount):
-            categories.append(Category())
-#        f.write("Categories: " + str(len(categories)) + "\n")
-#        for c in categories:
-#            f.write(c.name + "\n")
-#            if c.parent:
-#                f.write(str(c.parent.id) + "\n")
-#            else:
-#                f.write("0" + "\n")
+            categoryName = f.readline()[:-1]
+            parentID = str2int(f.readline())
+            categories.append(Category(categoryName, parentID))
+        for c in categories:
+            if c.parent > 0:
+                c.parent = c[c.parent-1]
+            else:
+                c.parent = None
+
+        transactionsCount = str2int(f.readline())
+        for i in range(transactionsCount):
+            transDate = datetime.strptime(f.readline()[:-1], "%Y-%m-%d").date()
+            transText = f.readline()[:-1]
+            transAmount = str2float(f.readline().replace(".", decimalSeparator).replace(",", decimalSeparator))
+            transBalance = str2float(f.readline().replace(".", decimalSeparator).replace(",", decimalSeparator))
+            transAccount = str2int(f.readline())
+            transCategory = str2int(f.readline())
+            transactions.append(Transaction(transDate, transText, transAmount, transBalance, accountID)
+        for c in categories:
+            if c.parent > 0:
+                c.parent = c[c.parent-1]
+            else:
+                c.parent = None
+
+
 #        f.write("Transactions: " + str(len(transactions)) + "\n")
 #        for t in transactions:
 #            f.write(str(t.dateTime) + "\n")
