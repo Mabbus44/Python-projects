@@ -17,6 +17,10 @@ accounts = []
 transactions = []
 rules = []
 window = Tk()
+menuBar = Menu(window)
+fileMenu = Menu(menuBar, tearoff=0)
+helpMenu = Menu(menuBar, tearoff=0)
+
 tabControl = ttk.Notebook(window)
 outerFrame1 = ttk.Frame(tabControl)
 canvas1 = Canvas(outerFrame1)
@@ -94,6 +98,7 @@ class Category:
 class Account:
     def __init__(self, name):
         self.name = name
+        self.id = 0
 
 
 # Common functions
@@ -192,13 +197,149 @@ def str2float(string):
     return float(newString)
 
 
+def str2int(string):
+    newString = ""
+    signFound = False
+    firstNumberFound = False
+    for c in string:
+        if not signFound and not firstNumberFound:
+            if c in "+-":
+                newString = newString + c
+                signFound = True
+        if c in "0123456789":
+            newString = newString + c
+            firstNumberFound = True
+    return int(newString)
+
+
+def newProject():
+    transactions.clear()
+    for r in rules:
+        r.conditions.clear()
+    rules.clear()
+    categories.clear()
+    accounts.clear()
+    drawTransactions()
+    drawRules()
+    drawCategories()
+    drawAccounts(tab4)
+
+
+def openProject():
+    fileName = filedialog.askopenfilename(initialdir="/", title="Save file",
+                                          filetypes=(("Money tracker project files", "*.mtp"), ("all files", "*.*")))
+    if fileName:
+        transactions.clear()
+        for r in rules:
+            r.conditions.clear()
+        rules.clear()
+        categories.clear()
+        accounts.clear()
+        f = codecs.open(fileName, 'r', encoding='utf8')
+        thisVersion = 1.0
+        fileVersion = str2float(f.readline().replace(".", decimalSeparator).replace(",", decimalSeparator))
+        if fileVersion > thisVersion:
+            messagebox.showerror("Error", "Could not load file, program version to old")
+            return
+        accountCount = str2int(f.readline())
+        for i in range(accountCount):
+            accounts.append(Account(f.readline()[:-1]))
+        categoriesCount = str2int(f.readline())
+        for i in range(categoriesCount):
+            categories.append(Category())
+#        f.write("Categories: " + str(len(categories)) + "\n")
+#        for c in categories:
+#            f.write(c.name + "\n")
+#            if c.parent:
+#                f.write(str(c.parent.id) + "\n")
+#            else:
+#                f.write("0" + "\n")
+#        f.write("Transactions: " + str(len(transactions)) + "\n")
+#        for t in transactions:
+#            f.write(str(t.dateTime) + "\n")
+#            f.write(t.text + "\n")
+#            f.write(str(t.amount) + "\n")
+#            f.write(str(t.balance) + "\n")
+#            if t.account:
+#                f.write(str(t.account.id) + "\n")
+#            else:
+#                f.write("0" + "\n")
+#            if t.category:
+#                f.write(str(t.category.id) + "\n")
+#            else:
+#                f.write("0" + "\n")
+#        f.write("Rules: " + str(len(rules)) + "\n")
+#        for r in rules:
+#            f.write(str(r.category.id) + "\n")
+#            f.write("Conditions: " + str(len(r.conditions)) + "\n")
+#            for c in r.conditions:
+#                f.write(str(c.field) + "\n")
+#                f.write(str(c.conditionType) + "\n")
+#                f.write(str(c.value) + "\n")
+        f.close()
+        messagebox.showinfo("Into", "File loaded successfully")
+        drawTransactions()
+        drawRules()
+        drawCategories()
+        drawAccounts(tab4)
+    else:
+        messagebox.showwarning("Warning", "File not saved")
+
+
+def saveProject():
+    fileName = filedialog.asksaveasfilename(initialdir="/", title="Save file",
+                                            filetypes=(("Money tracker project files", "*.mtp"), ("all files", "*.*")),
+                                            defaultextension=".mtp")
+    if fileName:
+        f = codecs.open(fileName, 'w', encoding='utf8')
+        f.write("File structure version: " + 1.0 + "\n")
+        for i in range(len(accounts)):
+            accounts[i].id = i+1
+        for i in range(len(categories)):
+            categories[i].id = i+1
+        f.write("Accounts: " + str(len(accounts)) + "\n")
+        for a in accounts:
+            f.write(a.name + "\n")
+        f.write("Categories: " + str(len(categories)) + "\n")
+        for c in categories:
+            f.write(c.name + "\n")
+            if c.parent:
+                f.write(str(c.parent.id) + "\n")
+            else:
+                f.write("0" + "\n")
+        f.write("Transactions: " + str(len(transactions)) + "\n")
+        for t in transactions:
+            f.write(str(t.dateTime) + "\n")
+            f.write(t.text + "\n")
+            f.write(str(t.amount) + "\n")
+            f.write(str(t.balance) + "\n")
+            if t.account:
+                f.write(str(t.account.id) + "\n")
+            else:
+                f.write("0" + "\n")
+            if t.category:
+                f.write(str(t.category.id) + "\n")
+            else:
+                f.write("0" + "\n")
+        f.write("Rules: " + str(len(rules)) + "\n")
+        for r in rules:
+            f.write(str(r.category.id) + "\n")
+            f.write("Conditions: " + str(len(r.conditions)) + "\n")
+            for c in r.conditions:
+                f.write(str(c.field) + "\n")
+                f.write(str(c.conditionType) + "\n")
+                f.write(str(c.value) + "\n")
+        f.close()
+        messagebox.showinfo("Info", "File saved successfully")
+    else:
+        messagebox.showwarning("Warning", "File not saved")
+
+
 # Transactions tab
 def drawTransactions():
     deleteAllChildren(tab1)
-    btn = Button(tab1, text="Load file", command=loadFileButton)
-    btn.grid(column=0, row=0)
     btn = Button(tab1, text="Apply rules", command=applyRulesButton)
-    btn.grid(column=1, row=0)
+    btn.grid(column=0, row=0)
     lbl = Label(tab1, text="Date")
     lbl.grid(sticky=W, row=1, column=0)
     lbl = Label(tab1, text="Text")
@@ -697,6 +838,15 @@ def selectAccountInPopup(popup, func, filename):
 def main():
     window.title("Money tracker")
     window.geometry("920x800")
+    fileMenu.add_command(label="import transactions", command=loadFileButton)
+    fileMenu.add_command(label="new", command=newProject)
+    fileMenu.add_command(label="open", command=openProject)
+    fileMenu.add_command(label="save", command=saveProject)
+    helpMenu.add_command(label="about", command=lambda: messagebox.showinfo("About", "Money tracker v0.1"))
+    menuBar.add_cascade(label="File", menu=fileMenu)
+    menuBar.add_cascade(label="Help", menu=helpMenu)
+    window.config(menu=menuBar)
+
     tabControl.add(outerFrame1, text="Transactions")
     tabControl.add(outerFrame2, text="Rules")
     tabControl.add(outerFrame3, text="Categories")
