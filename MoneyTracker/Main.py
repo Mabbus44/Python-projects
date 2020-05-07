@@ -599,12 +599,14 @@ def conditionTypeSelected(event):
 
 def conditionValueChanged(sv):
     if sv.condition.field == FIELD["AMOUNT"]:
-        try:
-            sv.condition.value = int(sv.get())
-        except ValueError:
-            pass
-    else:
+        sv.condition.value = str2float(sv.get())
+    if sv.condition.field == FIELD["TEXT"]:
         sv.condition.value = sv.get()
+    if sv.condition.field == FIELD["DATETIME"]:
+        try:
+            sv.condition.value = datetime.strptime(sv.get(), "%Y-%m-%d").date()
+        except ValueError:
+            print("Value error")
 
 
 # Categories tab
