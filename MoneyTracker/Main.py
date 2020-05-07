@@ -118,8 +118,12 @@ def appendCategory(name, parent=None):
 
 
 def deleteCategory(category, catCopy):
-    if category.parent:
-        deleteCategory(category.parent, catCopy)
+    for c in catCopy:
+        if c.parent == category:
+            deleteCategory(c, catCopy)
+    for t in transactions:
+        if t.category == category:
+            t.category = None
     categories.remove(category)
 
 
@@ -420,7 +424,7 @@ def applyRulesButton():
                         if not(field != c.value):
                             ruleApplies = False
                     if c.conditionType == COND["C"]:
-                        if not(c.value.lower() in field.lower()):
+                        if c.field != FIELD["TEXT"] or not(c.value.lower() in field.lower()):
                             ruleApplies = False
                 if ruleApplies:
                     t.category = r.category
@@ -476,24 +480,15 @@ def drawRules():
             combo.rule = r
             row += 1
             for c in r.conditions:
-                combo = ttk.Combobox(tab2, values=["Date/time", "Text", "Amount"], state="readonly")
-                combo.grid(row=row, column=0)
-                combo.current(c.field-1)
-                combo.bind("<<ComboboxSelected>>", conditionFieldSelected)
-                combo.bind("<Button-3>", rightClickRule)
-                popup = Menu(combo, tearoff=0)
+                combo2 = ttk.Combobox(tab2, values=["<", "<=", "==", ">=", ">", "!=", "Contains"], state="readonly")
+                combo2.grid(row=row, column=1)
+                combo2.current(c.conditionType-1)
+                combo2.bind("<<ComboboxSelected>>", conditionTypeSelected)
+                combo2.bind("<Button-3>", rightClickRule)
+                popup = Menu(combo2, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
-                combo.popup = popup
-                combo.condition = c
-                combo = ttk.Combobox(tab2, values=["<", "<=", "==", ">=", ">", "!=", "Contains"], state="readonly")
-                combo.grid(row=row, column=1)
-                combo.current(c.conditionType-1)
-                combo.bind("<<ComboboxSelected>>", conditionTypeSelected)
-                combo.bind("<Button-3>", rightClickRule)
-                popup = Menu(combo, tearoff=0)
-                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
-                combo.popup = popup
-                combo.condition = c
+                combo2.popup = popup
+                combo2.condition = c
                 sv = StringVar()
                 sv.condition = c
                 sv.trace("w", lambda name, index, mode, svArg=sv: conditionValueChanged(svArg))
@@ -504,6 +499,17 @@ def drawRules():
                 popup = Menu(e, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
                 e.popup = popup
+                combo1 = ttk.Combobox(tab2, values=["Date/time", "Text", "Amount"], state="readonly")
+                combo1.grid(row=row, column=0)
+                combo1.current(c.field-1)
+                combo1.bind("<<ComboboxSelected>>", conditionFieldSelected)
+                combo1.bind("<Button-3>", rightClickRule)
+                popup = Menu(combo1, tearoff=0)
+                popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
+                combo1.popup = popup
+                combo1.condition = c
+                combo1.conditionTypeBox = combo2
+                combo1.valueBox = sv
                 row += 1
             btn = Button(tab2, text="+", command=lambda argR=r: addConditionButton(argR))
             btn.grid(row=row, column=1)
@@ -591,6 +597,14 @@ def ruleCategorySelected(event):
 
 def conditionFieldSelected(event):
     event.widget.condition.field = event.widget.current()+1
+    if event.widget.condition.field == FIELD["DATETIME"]:
+        try:
+            event.widget.condition.value = datetime.strptime(event.widget.valueBox.get(), "%Y-%m-%d").date()
+        except ValueError:
+            event.widget.valueBox.set("1986-07-25")
+    if event.widget.condition.field == FIELD["AMOUNT"]:
+        event.widget.condition.value = str2float(event.widget.valueBox.get())
+        event.widget.valueBox.set(str(event.widget.condition.value))
 
 
 def conditionTypeSelected(event):
@@ -606,7 +620,7 @@ def conditionValueChanged(sv):
         try:
             sv.condition.value = datetime.strptime(sv.get(), "%Y-%m-%d").date()
         except ValueError:
-            print("Value error")
+            pass
 
 
 # Categories tab
@@ -642,7 +656,7 @@ def addTreeItem(tree, catCopy, category):
             if c == category.parent:
                 addTreeItem(tree, catCopy, c)
                 break
-        tree.insert(category.parent.id if category.parent else "0", "end", category.id, text=category.name)
+        tree.insert(category.parent.id, "end", category.id, text=category.name)
         catCopy.remove(category)
         return
 
@@ -752,6 +766,9 @@ def rightClickAccount(event):
 
 def removeAccount(frame, a):
     accounts.remove(a)
+    for t in transactions:
+        if t.account == a:
+            t.account = None
     drawAccounts(frame)
 
 
@@ -870,36 +887,6 @@ def main():
     scrollbar3.pack(side="right", fill="y")
     canvas4.pack(side="left", fill="both", expand=True)
     scrollbar4.pack(side="right", fill="y")
-
-    categories.append(Category("Bil", None))
-    categories.append(Category("Mat", None))
-    categories.append(Category("Service", categories[0]))
-    categories.append(Category("Hyra", None))
-
-    r = Rule(categories[0])
-    c = Condition(FIELD["TEXT"], COND["C"], "CIRCLE")
-    r.conditions.append(c)
-    c = Condition(FIELD["AMOUNT"], COND["G"], 100)
-    r.conditions.append(c)
-    rules.append(r)
-
-    r = Rule(categories[1])
-    c = Condition(FIELD["TEXT"], COND["C"], "ICA")
-    r.conditions.append(c)
-    rules.append(r)
-
-    r = Rule(categories[2])
-    c = Condition(FIELD["TEXT"], COND["C"], "KISTA")
-    r.conditions.append(c)
-    rules.append(r)
-
-    r = Rule(categories[3])
-    c = Condition(FIELD["TEXT"], COND["C"], "Fastum")
-    r.conditions.append(c)
-    rules.append(r)
-
-    accounts.append(Account("Rasmus lönekonto"))
-    accounts.append(Account("Räkningskonto"))
 
     window.mainloop()
 
