@@ -5,6 +5,11 @@ from tkinter import ttk
 from tkinter import *
 from datetime import datetime
 import codecs
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import style
+style.use('ggplot')
+
 
 # Constants
 FIELD = {"DATETIME": 1, "TEXT": 2, "AMOUNT": 3}
