@@ -5,11 +5,8 @@ from tkinter import ttk
 from tkinter import *
 from datetime import datetime
 import codecs
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import style
-style.use('ggplot')
-
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 # Constants
 FIELD = {"DATETIME": 1, "TEXT": 2, "AMOUNT": 3}
@@ -58,6 +55,14 @@ tab4 = ttk.Frame(canvas4)
 canvas4.create_window((0, 0), window=tab4, anchor="nw")
 canvas4.configure(yscrollcommand=scrollbar4.set)
 tab4.bind("<Configure>", lambda e: canvas4.configure(scrollregion=canvas4.bbox("all")))
+
+outerFrame5 = ttk.Frame(tabControl)
+canvas5 = Canvas(outerFrame5)
+scrollbar5 = ttk.Scrollbar(outerFrame5, orient="vertical", command=canvas5.yview)
+tab5 = ttk.Frame(canvas5)
+canvas5.create_window((0, 0), window=tab5, anchor="nw")
+canvas5.configure(yscrollcommand=scrollbar5.set)
+tab5.bind("<Configure>", lambda e: canvas5.configure(scrollregion=canvas5.bbox("all")))
 
 selectedItem = None
 decimalSeparator = ","
@@ -116,6 +121,8 @@ def tabChanged(event):
         drawCategories()
     if tabControl.tab(tabControl.select(), "text") == "Accounts":
         drawAccounts(tab4)
+    if tabControl.tab(tabControl.select(), "text") == "Graphs":
+        drawGraphs()
 
 
 def appendCategory(name, parent=None):
@@ -788,6 +795,22 @@ def accountNameChanged(sv):
     sv.account.name = sv.get()
 
 
+# Graphs tab
+def drawGraphs():
+    deleteAllChildren(tab5)
+    fig = Figure(figsize=(5, 4), dpi=100)
+    graph1 = fig.add_subplot(111)
+    x=[]
+    x.append(datetime(2019, 7, 15).date())
+    x.append(datetime(2019, 7, 18).date())
+    y = [1, 2]
+    graph1.plot_date(x, y, xdate=True)
+
+    canvas = FigureCanvasTkAgg(fig, master=tab5)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+
+
 # Popups
 def drawAccountsPopup(frame, popup, func, filename):
     deleteAllChildren(frame)
@@ -811,7 +834,7 @@ def drawAccountsPopup(frame, popup, func, filename):
             lbl.grid(sticky=W, row=row, column=0)
             lbl.account = a
             lbl.bind("<Button-1>", lambda event, f=frame, p=popup, fu=func, fi=filename:
-                    selectAccount2(f, event, p, fu, fi))
+                     selectAccount2(f, event, p, fu, fi))
             lbl.bind("<Button-3>", rightClickAccount2)
             popupR = Menu(lbl, tearoff=0)
             popupR.add_command(label="Remove account", command=lambda f=frame, aArg=a, p=popup, fu=func, fi=filename:
@@ -881,6 +904,7 @@ def main():
     tabControl.add(outerFrame2, text="Rules")
     tabControl.add(outerFrame3, text="Categories")
     tabControl.add(outerFrame4, text="Accounts")
+    tabControl.add(outerFrame5, text="Graphs")
     tabControl.pack(expand=1, fill="both")
     tabControl.bind("<<NotebookTabChanged>>", lambda event: tabChanged(event))
 
@@ -892,6 +916,8 @@ def main():
     scrollbar3.pack(side="right", fill="y")
     canvas4.pack(side="left", fill="both", expand=True)
     scrollbar4.pack(side="right", fill="y")
+    canvas5.pack(side="left", fill="both", expand=True)
+    scrollbar5.pack(side="right", fill="y")
 
     window.mainloop()
 

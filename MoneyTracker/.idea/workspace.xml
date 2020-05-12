@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4f8b85f8-534d-4082-88df-e31dec9e44bb" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/A486071.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/A486071.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/rasun.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/rasun.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
     </list>
@@ -114,26 +114,26 @@
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
     <state x="294" y="159" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1010@0.0.1680.1010" timestamp="1587991638731" />
-    <state width="1515" height="210" key="GridCell.Tab.0.bottom" timestamp="1589223661649">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1659" height="272" key="GridCell.Tab.0.bottom" timestamp="1589289138807">
+      <screen x="0" y="0" width="1680" height="1010" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1589223661649" />
-    <state width="1659" height="272" key="GridCell.Tab.0.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1588859862983" />
-    <state width="1515" height="210" key="GridCell.Tab.0.center" timestamp="1589223661649">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1659" height="272" key="GridCell.Tab.0.bottom/0.0.1680.1010@0.0.1680.1010" timestamp="1589289138807" />
+    <state width="1659" height="272" key="GridCell.Tab.0.center" timestamp="1589289138807">
+      <screen x="0" y="0" width="1680" height="1010" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1589223661649" />
-    <state width="1659" height="272" key="GridCell.Tab.0.center/0.0.1680.1010@0.0.1680.1010" timestamp="1588859862983" />
-    <state width="1515" height="210" key="GridCell.Tab.0.left" timestamp="1589223661649">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1659" height="272" key="GridCell.Tab.0.center/0.0.1680.1010@0.0.1680.1010" timestamp="1589289138807" />
+    <state width="1659" height="272" key="GridCell.Tab.0.left" timestamp="1589289138807">
+      <screen x="0" y="0" width="1680" height="1010" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1589223661649" />
-    <state width="1659" height="272" key="GridCell.Tab.0.left/0.0.1680.1010@0.0.1680.1010" timestamp="1588859862983" />
-    <state width="1515" height="210" key="GridCell.Tab.0.right" timestamp="1589223661649">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1659" height="272" key="GridCell.Tab.0.left/0.0.1680.1010@0.0.1680.1010" timestamp="1589289138807" />
+    <state width="1659" height="272" key="GridCell.Tab.0.right" timestamp="1589289138807">
+      <screen x="0" y="0" width="1680" height="1010" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1589223661649" />
-    <state width="1659" height="272" key="GridCell.Tab.0.right/0.0.1680.1010@0.0.1680.1010" timestamp="1588859862983" />
+    <state width="1659" height="272" key="GridCell.Tab.0.right/0.0.1680.1010@0.0.1680.1010" timestamp="1589289138807" />
     <state width="1659" height="336" key="GridCell.Tab.1.bottom" timestamp="1588772411087">
       <screen x="0" y="0" width="1680" height="1010" />
     </state>
@@ -168,7 +168,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>714</line>
+          <line>721</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
