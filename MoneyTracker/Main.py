@@ -800,12 +800,10 @@ def drawGraphs():
     deleteAllChildren(tab5)
     fig = Figure(figsize=(5, 4), dpi=100)
     graph1 = fig.add_subplot(111)
-    x=[]
-    x.append(datetime(2019, 7, 15).date())
-    x.append(datetime(2019, 7, 18).date())
+    x=[datetime(2019, 7, 15).date(), datetime(2019, 7, 18).date()]
     y = [1, 2]
     graph1.plot_date(x, y, xdate=True)
-
+    graph1.set_ylabel("Money")
     canvas = FigureCanvasTkAgg(fig, master=tab5)
     canvas.draw()
     canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
