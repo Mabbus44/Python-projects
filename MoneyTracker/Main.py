@@ -8,6 +8,7 @@ import codecs
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Constants
 FIELD = {"DATETIME": 1, "TEXT": 2, "AMOUNT": 3}
@@ -846,24 +847,42 @@ def drawGraphs():
     cmap = plt.get_cmap("tab20c")
     level1Values = []
     level1Colors = []
+    level1Labels = []
     level2Values = []
     level2Colors = []
+    level2Labels = []
     color = 0
     for c in level1Categories:
         level1Values.append(c.negSum)
         level1Colors.append(color)
+        level1Labels.append(c.name)
         childColor = color
         for c2 in c.children:
             level2Values.append(c2.negSum)
             level2Colors.append(childColor)
+            level2Labels.append(c2.name)
             childColor += 1
             if childColor % 4 == 0:
                 childColor -= 4
         color += 4
         if color == 20:
             color = 0
-    graph2.pie(level1Values, colors=cmap(level1Colors), radius=1.0, wedgeprops=dict(width=0.3, edgecolor='w'))
-    graph2.pie(level2Values, colors=cmap(level2Colors), radius=0.7, wedgeprops=dict(width=0.3, edgecolor='w'))
+    graph2.pie(level1Values, colors=cmap(level1Colors), radius=1.0,
+               wedgeprops=dict(width=0.5, edgecolor='w'))
+
+    wedges, notUsed = graph2.pie(level2Values, colors=cmap(level2Colors), radius=0.8,
+                                 wedgeprops=dict(width=0.3, edgecolor='w'))
+    kw = dict(arrowprops=dict(arrowstyle="-"), va="center")
+    for i, p in enumerate(wedges):
+        ang = (p.theta2 - p.theta1) / 2. + p.theta1
+        y = np.sin(np.deg2rad(ang))
+        x = np.cos(np.deg2rad(ang))
+        horizontalAlignment = {-1: "right", 1: "left"}[int(np.sign(x))]
+        connectionStyle = "angle,angleA=0,angleB={}".format(ang)
+        kw["arrowprops"].update({"connectionstyle": connectionStyle})
+        graph2.annotate(level2Labels[i], xy=(x*0.65, y*0.65), xytext=(1.35 * np.sign(x), 1.4 * y),
+                        horizontalalignment=horizontalAlignment, **kw)
+
     canvas = FigureCanvasTkAgg(fig, master=tab5)
     canvas.draw()
     canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
