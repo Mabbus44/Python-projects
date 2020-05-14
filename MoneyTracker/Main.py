@@ -103,8 +103,10 @@ class Category:
     def __init__(self, name, parent=None):
         self.name = name
         self.parent = parent
+        self.children = []
         self.id = 0
-        self.sum = 0
+        self.posSum = 0
+        self.negSum = 0
 
 
 class Account:
@@ -306,7 +308,6 @@ def openProject():
                     value = str2int(f.readline())
                 rules[i].conditions.append(Condition(field, conditionType, value))
         f.close()
-        messagebox.showinfo("Info", "File loaded successfully")
         drawTransactions()
         drawRules()
         drawCategories()
@@ -805,8 +806,30 @@ def drawGraphs():
         a.balance = 0
     transactions.sort(key=lambda tran: tran.dateTime)
     dates = []
-    totalBalance = []
+    for c in categories:
+        c.posSum = 0
+        c.negSum = 0
+        c.children = [Category(c.name)]
+    level1Categories = []
+    for c in categories:
+        if c.parent:
+            c.parent.children.append(c)
+        else:
+            level1Categories.append(c)
+    balancePerDay = []
     for i in range(len(transactions)):
+        if transactions[i].category:
+            cat = transactions[i].category
+            if transactions[i].amount > 0:
+                cat.children[0].posSum += transactions[i].amount
+            else:
+                cat.children[0].negSum -= transactions[i].amount
+            while cat:
+                if transactions[i].amount > 0:
+                    cat.posSum += transactions[i].amount
+                else:
+                    cat.negSum -= transactions[i].amount
+                cat = cat.parent
         if transactions[i].account:
             transactions[i].account.balance = transactions[i].balance
         totalBalance = 0
@@ -814,15 +837,33 @@ def drawGraphs():
             totalBalance += a.balance
         if i == len(transactions)-1 or transactions[i].dateTime != transactions[i+1].dateTime:
             dates.append(transactions[i].dateTime)
-            totalBalance.append(totalBalance)
+            balancePerDay.append(totalBalance)
     fig = Figure(figsize=(10, 10), dpi=100)
     graph1 = fig.add_subplot(211)
-    graph1.plot_date(dates, totalBalance, xdate=True, ls="-")
+    graph1.plot_date(dates, balancePerDay, xdate=True, ls="-")
     graph1.set_ylabel("Total money")
     graph2 = fig.add_subplot(212)
     cmap = plt.get_cmap("tab20c")
-    graph2.pie([3, 4, 1, 2], colors=cmap([0, 1, 2, 3]), radius=1.0, wedgeprops=dict(width=0.3, edgecolor='w'))
-    graph2.pie([3, 3, 1, 1, 2], colors=cmap([4, 5, 6, 7, 8]), radius=0.7, wedgeprops=dict(width=0.3, edgecolor='w'))
+    level1Values = []
+    level1Colors = []
+    level2Values = []
+    level2Colors = []
+    color = 0
+    for c in level1Categories:
+        level1Values.append(c.negSum)
+        level1Colors.append(color)
+        childColor = color
+        for c2 in c.children:
+            level2Values.append(c2.negSum)
+            level2Colors.append(childColor)
+            childColor += 1
+            if childColor % 4 == 0:
+                childColor -= 4
+        color += 4
+        if color == 20:
+            color = 0
+    graph2.pie(level1Values, colors=cmap(level1Colors), radius=1.0, wedgeprops=dict(width=0.3, edgecolor='w'))
+    graph2.pie(level2Values, colors=cmap(level2Colors), radius=0.7, wedgeprops=dict(width=0.3, edgecolor='w'))
     canvas = FigureCanvasTkAgg(fig, master=tab5)
     canvas.draw()
     canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
