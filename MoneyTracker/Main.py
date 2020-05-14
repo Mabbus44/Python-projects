@@ -7,6 +7,7 @@ from datetime import datetime
 import codecs
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 # Constants
 FIELD = {"DATETIME": 1, "TEXT": 2, "AMOUNT": 3}
@@ -103,12 +104,14 @@ class Category:
         self.name = name
         self.parent = parent
         self.id = 0
+        self.sum = 0
 
 
 class Account:
     def __init__(self, name):
         self.name = name
         self.id = 0
+        self.balance = 0
 
 
 # Common functions
@@ -798,12 +801,28 @@ def accountNameChanged(sv):
 # Graphs tab
 def drawGraphs():
     deleteAllChildren(tab5)
-    fig = Figure(figsize=(5, 4), dpi=100)
-    graph1 = fig.add_subplot(111)
-    x=[datetime(2019, 7, 15).date(), datetime(2019, 7, 18).date()]
-    y = [1, 2]
-    graph1.plot_date(x, y, xdate=True)
-    graph1.set_ylabel("Money")
+    for a in accounts:
+        a.balance = 0
+    transactions.sort(key=lambda tran: tran.dateTime)
+    dates = []
+    totalBalance = []
+    for i in range(len(transactions)):
+        if transactions[i].account:
+            transactions[i].account.balance = transactions[i].balance
+        totalBalance = 0
+        for a in accounts:
+            totalBalance += a.balance
+        if i == len(transactions)-1 or transactions[i].dateTime != transactions[i+1].dateTime:
+            dates.append(transactions[i].dateTime)
+            totalBalance.append(totalBalance)
+    fig = Figure(figsize=(10, 10), dpi=100)
+    graph1 = fig.add_subplot(211)
+    graph1.plot_date(dates, totalBalance, xdate=True, ls="-")
+    graph1.set_ylabel("Total money")
+    graph2 = fig.add_subplot(212)
+    cmap = plt.get_cmap("tab20c")
+    graph2.pie([3, 4, 1, 2], colors=cmap([0, 1, 2, 3]), radius=1.0, wedgeprops=dict(width=0.3, edgecolor='w'))
+    graph2.pie([3, 3, 1, 1, 2], colors=cmap([4, 5, 6, 7, 8]), radius=0.7, wedgeprops=dict(width=0.3, edgecolor='w'))
     canvas = FigureCanvasTkAgg(fig, master=tab5)
     canvas.draw()
     canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
