@@ -1,14 +1,14 @@
-from tkinter import simpledialog
-from tkinter import messagebox
-from tkinter import filedialog
-from tkinter import ttk
-from tkinter import *
+import tkinter
+import tkinter.ttk as ttk
+import tkinter.filedialog as filedialog
+import tkinter.messagebox as messagebox
+import tkinter.simpledialog as simpledialog
 from datetime import datetime
 import codecs
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
+import numpy
+import matplotlib.backends.backend_tkagg as matTkagg
+import matplotlib.figure as matFig
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Constants
 FIELD = {"DATETIME": 1, "TEXT": 2, "AMOUNT": 3}
@@ -20,14 +20,14 @@ categories = []
 accounts = []
 transactions = []
 rules = []
-window = Tk()
-menuBar = Menu(window)
-fileMenu = Menu(menuBar, tearoff=0)
-helpMenu = Menu(menuBar, tearoff=0)
+window = tkinter.Tk()
+menuBar = tkinter.Menu(window)
+fileMenu = tkinter.Menu(menuBar, tearoff=0)
+helpMenu = tkinter.Menu(menuBar, tearoff=0)
 
 tabControl = ttk.Notebook(window)
 outerFrame1 = ttk.Frame(tabControl)
-canvas1 = Canvas(outerFrame1)
+canvas1 = tkinter.Canvas(outerFrame1)
 scrollbar1 = ttk.Scrollbar(outerFrame1, orient="vertical", command=canvas1.yview)
 tab1 = ttk.Frame(canvas1)
 canvas1.create_window((0, 0), window=tab1, anchor="nw")
@@ -35,7 +35,7 @@ canvas1.configure(yscrollcommand=scrollbar1.set)
 tab1.bind("<Configure>", lambda e: canvas1.configure(scrollregion=canvas1.bbox("all")))
 
 outerFrame2 = ttk.Frame(tabControl)
-canvas2 = Canvas(outerFrame2)
+canvas2 = tkinter.Canvas(outerFrame2)
 scrollbar2 = ttk.Scrollbar(outerFrame2, orient="vertical", command=canvas2.yview)
 tab2 = ttk.Frame(canvas2)
 canvas2.create_window((0, 0), window=tab2, anchor="nw")
@@ -43,7 +43,7 @@ canvas2.configure(yscrollcommand=scrollbar2.set)
 tab2.bind("<Configure>", lambda e: canvas2.configure(scrollregion=canvas2.bbox("all")))
 
 outerFrame3 = ttk.Frame(tabControl)
-canvas3 = Canvas(outerFrame3)
+canvas3 = tkinter.Canvas(outerFrame3)
 scrollbar3 = ttk.Scrollbar(outerFrame3, orient="vertical", command=canvas3.yview)
 tab3 = ttk.Frame(canvas3)
 canvas3.create_window((0, 0), window=tab3, anchor="nw")
@@ -51,7 +51,7 @@ canvas3.configure(yscrollcommand=scrollbar3.set)
 tab3.bind("<Configure>", lambda e: canvas3.configure(scrollregion=canvas3.bbox("all")))
 
 outerFrame4 = ttk.Frame(tabControl)
-canvas4 = Canvas(outerFrame4)
+canvas4 = tkinter.Canvas(outerFrame4)
 scrollbar4 = ttk.Scrollbar(outerFrame4, orient="vertical", command=canvas4.yview)
 tab4 = ttk.Frame(canvas4)
 canvas4.create_window((0, 0), window=tab4, anchor="nw")
@@ -59,7 +59,7 @@ canvas4.configure(yscrollcommand=scrollbar4.set)
 tab4.bind("<Configure>", lambda e: canvas4.configure(scrollregion=canvas4.bbox("all")))
 
 outerFrame5 = ttk.Frame(tabControl)
-canvas5 = Canvas(outerFrame5)
+canvas5 = tkinter.Canvas(outerFrame5)
 scrollbar5 = ttk.Scrollbar(outerFrame5, orient="vertical", command=canvas5.yview)
 tab5 = ttk.Frame(canvas5)
 canvas5.create_window((0, 0), window=tab5, anchor="nw")
@@ -301,6 +301,7 @@ def openProject():
             for i2 in range(conditionsCount):
                 field = str2int(f.readline())
                 conditionType = str2int(f.readline())
+                value = 0
                 if field == FIELD["DATETIME"]:
                     value = datetime.strptime(f.readline()[:-1], "%Y-%m-%d").date()
                 if field == FIELD["TEXT"]:
@@ -365,34 +366,34 @@ def saveProject():
 # Transactions tab
 def drawTransactions():
     deleteAllChildren(tab1)
-    btn = Button(tab1, text="Apply rules", command=applyRulesButton)
+    btn = ttk.Button(tab1, text="Apply rules", command=applyRulesButton)
     btn.grid(column=0, row=0)
-    lbl = Label(tab1, text="Date")
-    lbl.grid(sticky=W, row=1, column=0)
-    lbl = Label(tab1, text="Text")
-    lbl.grid(sticky=W, row=1, column=1)
-    lbl = Label(tab1, text="Amount")
-    lbl.grid(sticky=W, row=1, column=2)
-    lbl = Label(tab1, text="Balance")
-    lbl.grid(sticky=W, row=1, column=3)
-    lbl = Label(tab1, text="Account")
-    lbl.grid(sticky=W, row=1, column=4)
-    lbl = Label(tab1, text="Category")
-    lbl.grid(sticky=W, row=1, column=5)
+    lbl = ttk.Label(tab1, text="Date")
+    lbl.grid(sticky=tkinter.W, row=1, column=0)
+    lbl = ttk.Label(tab1, text="Text")
+    lbl.grid(sticky=tkinter.W, row=1, column=1)
+    lbl = ttk.Label(tab1, text="Amount")
+    lbl.grid(sticky=tkinter.W, row=1, column=2)
+    lbl = ttk.Label(tab1, text="Balance")
+    lbl.grid(sticky=tkinter.W, row=1, column=3)
+    lbl = ttk.Label(tab1, text="Account")
+    lbl.grid(sticky=tkinter.W, row=1, column=4)
+    lbl = ttk.Label(tab1, text="Category")
+    lbl.grid(sticky=tkinter.W, row=1, column=5)
     row = 2
     for t in transactions:
-        lbl = Label(tab1, text=t.dateTime)
-        lbl.grid(sticky=W, row=row, column=0)
-        lbl = Label(tab1, text=t.text)
-        lbl.grid(sticky=W, row=row, column=1)
-        lbl = Label(tab1, text=t.amount)
-        lbl.grid(sticky=W, row=row, column=2)
-        lbl = Label(tab1, text=t.balance)
-        lbl.grid(sticky=W, row=row, column=3)
-        lbl = Label(tab1, text=t.account.name if t.account else "None")
-        lbl.grid(sticky=W, row=row, column=4)
-        lbl = Label(tab1, text=t.category.name if t.category else "None")
-        lbl.grid(sticky=W, row=row, column=5)
+        lbl = tkinter.Label(tab1, text=t.dateTime)
+        lbl.grid(sticky=tkinter.W, row=row, column=0)
+        lbl = ttk.Label(tab1, text=t.text)
+        lbl.grid(sticky=tkinter.W, row=row, column=1)
+        lbl = ttk.Label(tab1, text=t.amount)
+        lbl.grid(sticky=tkinter.W, row=row, column=2)
+        lbl = ttk.Label(tab1, text=t.balance)
+        lbl.grid(sticky=tkinter.W, row=row, column=3)
+        lbl = ttk.Label(tab1, text=t.account.name if t.account else "None")
+        lbl.grid(sticky=tkinter.W, row=row, column=4)
+        lbl = ttk.Label(tab1, text=t.category.name if t.category else "None")
+        lbl.grid(sticky=tkinter.W, row=row, column=5)
         row += 1
 
 
@@ -400,7 +401,7 @@ def loadFileButton():
     filename = filedialog.askopenfilename(initialdir="/", title="Select file",
                                           filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
     if filename:
-        popup = Toplevel()
+        popup = tkinter.Toplevel()
         popup.grab_set()
         popup.title("Accounts")
         popup.geometry("500x400")
@@ -491,7 +492,7 @@ def drawRules():
             combo.current(selectedIndex)
             combo.bind("<<ComboboxSelected>>", ruleCategorySelected)
             combo.bind("<Button-3>", rightClickRule)
-            popup = Menu(combo, tearoff=0)
+            popup = tkinter.Menu(combo, tearoff=0)
             popup.add_command(label="Remove rule", command=lambda rArg=r: removeRule(rArg))
             combo.popup = popup
             combo.rule = r
@@ -502,18 +503,18 @@ def drawRules():
                 combo2.current(c.conditionType-1)
                 combo2.bind("<<ComboboxSelected>>", conditionTypeSelected)
                 combo2.bind("<Button-3>", rightClickRule)
-                popup = Menu(combo2, tearoff=0)
+                popup = tkinter.Menu(combo2, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
                 combo2.popup = popup
                 combo2.condition = c
-                sv = StringVar()
+                sv = tkinter.StringVar()
                 sv.condition = c
                 sv.trace("w", lambda name, index, mode, svArg=sv: conditionValueChanged(svArg))
-                e = Entry(tab2, textvariable=sv)
+                e = ttk.Entry(tab2, textvariable=sv)
                 e.insert(0, c.value)
-                e.grid(sticky=W, row=row, column=2)
+                e.grid(sticky=tkinter.W, row=row, column=2)
                 e.bind("<Button-3>", rightClickRule)
-                popup = Menu(e, tearoff=0)
+                popup = tkinter.Menu(e, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
                 e.popup = popup
                 combo1 = ttk.Combobox(tab2, values=["Date/time", "Text", "Amount"], state="readonly")
@@ -521,53 +522,53 @@ def drawRules():
                 combo1.current(c.field-1)
                 combo1.bind("<<ComboboxSelected>>", conditionFieldSelected)
                 combo1.bind("<Button-3>", rightClickRule)
-                popup = Menu(combo1, tearoff=0)
+                popup = tkinter.Menu(combo1, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
                 combo1.popup = popup
                 combo1.condition = c
                 combo1.conditionTypeBox = combo2
                 combo1.valueBox = sv
                 row += 1
-            btn = Button(tab2, text="+", command=lambda argR=r: addConditionButton(argR))
+            btn = ttk.Button(tab2, text="+", command=lambda argR=r: addConditionButton(argR))
             btn.grid(row=row, column=1)
             row += 1
         else:
-            lbl = Label(tab2, text=r.category.name)
-            lbl.grid(sticky=W, row=row, column=0)
+            lbl = ttk.Label(tab2, text=r.category.name)
+            lbl.grid(sticky=tkinter.W, row=row, column=0)
             lbl.rule = r
             lbl.bind("<Button-1>", selectRule)
             lbl.bind("<Button-3>", rightClickRule)
-            popup = Menu(lbl, tearoff=0)
+            popup = tkinter.Menu(lbl, tearoff=0)
             popup.add_command(label="Remove rule", command=lambda rArg=r: removeRule(rArg))
             lbl.popup = popup
             row += 1
             for c in r.conditions:
-                lbl = Label(tab2, text=fieldString(c.field), padx=10)
-                lbl.grid(sticky=W, row=row, column=0)
+                lbl = ttk.Label(tab2, text=fieldString(c.field), padx=10)
+                lbl.grid(sticky=tkinter.W, row=row, column=0)
                 lbl.rule = r
                 lbl.bind("<Button-1>", selectRule)
                 lbl.bind("<Button-3>", rightClickRule)
-                popup = Menu(lbl, tearoff=0)
+                popup = tkinter.Menu(lbl, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
                 lbl.popup = popup
-                lbl = Label(tab2, text=condString(c.conditionType))
-                lbl.grid(sticky=W, row=row, column=1)
+                lbl = ttk.Label(tab2, text=condString(c.conditionType))
+                lbl.grid(sticky=tkinter.W, row=row, column=1)
                 lbl.rule = r
                 lbl.bind("<Button-1>", selectRule)
                 lbl.bind("<Button-3>", rightClickRule)
-                popup = Menu(lbl, tearoff=0)
+                popup = tkinter.Menu(lbl, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
                 lbl.popup = popup
-                lbl = Label(tab2, text=c.value)
-                lbl.grid(sticky=W, row=row, column=2)
+                lbl = ttk.Label(tab2, text=c.value)
+                lbl.grid(sticky=tkinter.W, row=row, column=2)
                 lbl.rule = r
                 lbl.bind("<Button-1>", selectRule)
                 lbl.bind("<Button-3>", rightClickRule)
-                popup = Menu(lbl, tearoff=0)
+                popup = tkinter.Menu(lbl, tearoff=0)
                 popup.add_command(label="Remove condition", command=lambda rArg=r, cArg=c: removeCondition(rArg, cArg))
                 lbl.popup = popup
                 row += 1
-    btn = Button(tab2, text="+", command=addRuleButton)
+    btn = ttk.Button(tab2, text="+", command=addRuleButton)
     btn.grid(row=row, column=0)
 
 
@@ -646,21 +647,21 @@ def drawCategories():
     tree = ttk.Treeview(tab3)
     tree.bind("<Button-3>", rightClickCategory)
     tree.bind("<Double-1>", doubleClickCategory)
-    popup = Menu(tree, tearoff=0)
+    popup = tkinter.Menu(tree, tearoff=0)
     popup.add_command(label="Add new category", command=lambda treeArg=tree: addCategory(treeArg))
     popup.add_command(label="Remove category", command=lambda treeArg=tree: removeCategory(treeArg))
     popup.add_command(label="Rename category", command=lambda treeArg=tree: renameCategory(treeArg))
 
     tree.popup = popup
     tree.column("#0", width=270, minwidth=270)
-    tree.heading("#0", text="Categories", anchor=W)
+    tree.heading("#0", text="Categories", anchor=tkinter.W)
     tree.insert("", "end", 0, text="root")
     for i in range(len(categories)):
         categories[i].id = i+1
     catCopy = categories.copy()
     while len(catCopy) > 0:
         addTreeItem(tree, catCopy, catCopy[0])
-    tree.pack(side=TOP, fill=BOTH, expand=True)
+    tree.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
 
 
 def addTreeItem(tree, catCopy, category):
@@ -741,30 +742,30 @@ def drawAccounts(frame):
     row = 0
     for a in accounts:
         if a == selectedItem:
-            sv = StringVar()
+            sv = tkinter.StringVar()
             sv.account = a
             sv.trace("w", lambda name, index, mode, svArg=sv: accountNameChanged(svArg))
-            e = Entry(frame, textvariable=sv)
+            e = ttk.Entry(frame, textvariable=sv)
             e.insert(0, a.name)
-            e.grid(sticky=W, row=row, column=0)
+            e.grid(sticky=tkinter.W, row=row, column=0)
             e.bind("<Button-3>", rightClickAccount)
-            popup = Menu(e, tearoff=0)
+            popup = tkinter.Menu(e, tearoff=0)
             popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
                               removeAccount(f, aArg))
             e.popup = popup
             row += 1
         else:
-            lbl = Label(frame, text=a.name)
-            lbl.grid(sticky=W, row=row, column=0)
+            lbl = ttk.Label(frame, text=a.name)
+            lbl.grid(sticky=tkinter.W, row=row, column=0)
             lbl.account = a
             lbl.bind("<Button-1>", lambda event, f=frame: selectAccount(f, event))
             lbl.bind("<Button-3>", rightClickAccount)
-            popup = Menu(lbl, tearoff=0)
+            popup = tkinter.Menu(lbl, tearoff=0)
             popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
                               removeAccount(f, aArg))
             lbl.popup = popup
             row += 1
-    btn = Button(frame, text="+", command=lambda f=frame: addAccountButton(f))
+    btn = ttk.Button(frame, text="+", command=lambda f=frame: addAccountButton(f))
     btn.grid(row=row, column=0)
 
 
@@ -839,7 +840,7 @@ def drawGraphs():
         if i == len(transactions)-1 or transactions[i].dateTime != transactions[i+1].dateTime:
             dates.append(transactions[i].dateTime)
             balancePerDay.append(totalBalance)
-    fig = Figure(figsize=(10, 10), dpi=100)
+    fig = matFig.Figure(figsize=(10, 10), dpi=100)
     graph1 = fig.add_subplot(211)
     graph1.plot_date(dates, balancePerDay, xdate=True, ls="-")
     graph1.set_ylabel("Total money")
@@ -875,17 +876,17 @@ def drawGraphs():
     kw = dict(arrowprops=dict(arrowstyle="-"), va="center")
     for i, p in enumerate(wedges):
         ang = (p.theta2 - p.theta1) / 2. + p.theta1
-        y = np.sin(np.deg2rad(ang))
-        x = np.cos(np.deg2rad(ang))
-        horizontalAlignment = {-1: "right", 1: "left"}[int(np.sign(x))]
+        y = numpy.sin(numpy.deg2rad(ang))
+        x = numpy.cos(numpy.deg2rad(ang))
+        horizontalAlignment = {-1: "right", 1: "left"}[int(numpy.sign(x))]
         connectionStyle = "angle,angleA=0,angleB={}".format(ang)
         kw["arrowprops"].update({"connectionstyle": connectionStyle})
-        graph2.annotate(level2Labels[i], xy=(x*0.65, y*0.65), xytext=(1.35 * np.sign(x), 1.4 * y),
+        graph2.annotate(level2Labels[i], xy=(x*0.65, y*0.65), xytext=(1.35 * numpy.sign(x), 1.4 * y),
                         horizontalalignment=horizontalAlignment, **kw)
 
-    canvas = FigureCanvasTkAgg(fig, master=tab5)
+    canvas = matTkagg.FigureCanvasTkAgg(fig, master=tab5)
     canvas.draw()
-    canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+    canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
 
 
 # Popups
@@ -894,37 +895,37 @@ def drawAccountsPopup(frame, popup, func, filename):
     row = 0
     for a in accounts:
         if a == selectedItem:
-            sv = StringVar()
+            sv = tkinter.StringVar()
             sv.account = a
             sv.trace("w", lambda name, index, mode, svArg=sv: accountNameChanged2(svArg))
-            e = Entry(frame, textvariable=sv)
+            e = ttk.Entry(frame, textvariable=sv)
             e.insert(0, a.name)
-            e.grid(sticky=W, row=row, column=0)
+            e.grid(sticky=tkinter.W, row=row, column=0)
             e.bind("<Button-3>", rightClickAccount2)
-            popupR = Menu(e, tearoff=0)
+            popupR = tkinter.Menu(e, tearoff=0)
             popupR.add_command(label="Remove account", command=lambda f=frame, aArg=a, p=popup, fu=func,
-                              fi=filename: removeAccount2(f, aArg, p, fu, fi))
+                               fi=filename: removeAccount2(f, aArg, p, fu, fi))
             e.popup = popupR
             row += 1
         else:
-            lbl = Label(frame, text=a.name)
-            lbl.grid(sticky=W, row=row, column=0)
+            lbl = ttk.Label(frame, text=a.name)
+            lbl.grid(sticky=tkinter.W, row=row, column=0)
             lbl.account = a
             lbl.bind("<Button-1>", lambda event, f=frame, p=popup, fu=func, fi=filename:
                      selectAccount2(f, event, p, fu, fi))
             lbl.bind("<Button-3>", rightClickAccount2)
-            popupR = Menu(lbl, tearoff=0)
+            popupR = tkinter.Menu(lbl, tearoff=0)
             popupR.add_command(label="Remove account", command=lambda f=frame, aArg=a, p=popup, fu=func, fi=filename:
                                removeAccount2(f, aArg, p, fu, fi))
             lbl.popup = popupR
             row += 1
-    btn = Button(frame, text="+", command=lambda f=frame, p=popup, fu=func, fi=filename:
-                 addAccountButton2(f, p, fu, fi))
+    btn = ttk.Button(frame, text="+", command=lambda f=frame, p=popup, fu=func, fi=filename:
+                     addAccountButton2(f, p, fu, fi))
     btn.grid(row=row, column=0)
-    btn = Button(frame, text="Select", command=lambda argPopup=popup, argFunc=func, argFilename=filename:
-                 selectAccountInPopup(argPopup, argFunc, argFilename))
+    btn = ttk.Button(frame, text="Select", command=lambda argPopup=popup, argFunc=func, argFilename=filename:
+                     selectAccountInPopup(argPopup, argFunc, argFilename))
     btn.grid(row=row+1, column=0)
-    btn = Button(frame, text="Cancel", command=popup.destroy)
+    btn = ttk.Button(frame, text="Cancel", command=popup.destroy)
     btn.grid(row=row+1, column=1)
 
 

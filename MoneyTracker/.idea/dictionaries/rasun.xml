@@ -5,7 +5,10 @@
       <w>cmap</w>
       <w>connectionstyle</w>
       <w>matplotlib</w>
+      <w>messagebox</w>
       <w>rasun</w>
+      <w>simpledialog</w>
+      <w>tkagg</w>
     </words>
   </dictionary>
 </component>
