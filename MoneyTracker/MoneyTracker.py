@@ -20,6 +20,9 @@ class MoneyWindow:
         self.menuBar = tkinter.Menu(self.window)
         self.fileMenu = tkinter.Menu(self.menuBar, tearoff=0)
         self.helpMenu = tkinter.Menu(self.menuBar, tearoff=0)
+        self.popup = None
+        self.popupFrame = None
+        self.fileName = None
 
         self.tabControl = ttk.Notebook(self.window)
         self.outerFrame1 = tkinter.Frame(self.tabControl)
@@ -104,7 +107,7 @@ class MoneyWindow:
         if self.tabControl.tab(self.tabControl.select(), "text") == "Categories":
             self.drawCategories()
         if self.tabControl.tab(self.tabControl.select(), "text") == "Accounts":
-            self.drawAccounts(self.tab4)
+            self.drawAccounts()
         if self.tabControl.tab(self.tabControl.select(), "text") == "Graphs":
             self.drawGraphs()
 
@@ -123,7 +126,7 @@ class MoneyWindow:
             self.drawTransactions()
             self.drawRules()
             self.drawCategories()
-            self.drawAccounts(self.tab4)
+            self.drawAccounts()
 
     def saveProject(self):
         fileName = filedialog.asksaveasfilename(initialdir="/", title="Save file",
@@ -170,13 +173,14 @@ class MoneyWindow:
         filename = filedialog.askopenfilename(initialdir="/", title="Select file",
                                               filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
         if filename:
-            popup = tkinter.Toplevel()
-            popup.grab_set()
-            popup.title("Accounts")
-            popup.geometry("500x400")
-            popupFrame = tkinter.Frame(popup)
-            popupFrame.pack()
-            self.drawAccountsPopup(popupFrame, popup, self.mt.loadTransactions, filename)
+            self.popup = tkinter.Toplevel()
+            self.popup.grab_set()
+            self.popup.title("Accounts")
+            self.popup.geometry("500x400")
+            self.popupFrame = tkinter.Frame(self.popup)
+            self.popupFrame.pack()
+            self.fileName = filename
+            self.drawAccountsPopup()
 
     def applyRulesButton(self):
         for t in self.mt.transactions:
@@ -463,52 +467,52 @@ class MoneyWindow:
                 return
 
     # Accounts tab
-    def drawAccounts(self, frame):
-        deleteAllChildren(frame)
+    def drawAccounts(self):
+        deleteAllChildren(self.tab4)
         row = 0
         for a in self.mt.accounts:
             if a == self.selectedItem:
                 sv = tkinter.StringVar()
                 sv.account = a
                 sv.trace("w", lambda name, index, mode, svArg=sv: self.accountNameChanged(svArg))
-                e = tkinter.Entry(frame, textvariable=sv)
+                e = tkinter.Entry(self.tab4, textvariable=sv)
                 e.insert(0, a.name)
                 e.grid(sticky=tkinter.W, row=row, column=0)
                 e.bind("<Button-3>", showPopup)
                 popup = tkinter.Menu(e, tearoff=0)
-                popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
-                                  self.removeAccount(f, aArg))
+                popup.add_command(label="Remove account", command=lambda aArg=a:
+                                  self.removeAccount(aArg))
                 e.popup = popup
                 row += 1
             else:
-                lbl = tkinter.Label(frame, text=a.name)
+                lbl = tkinter.Label(self.tab4, text=a.name)
                 lbl.grid(sticky=tkinter.W, row=row, column=0)
                 lbl.account = a
-                lbl.bind("<Button-1>", lambda event, f=frame: self.selectAccount(f, event))
+                lbl.bind("<Button-1>", lambda event: self.selectAccount(event))
                 lbl.bind("<Button-3>", showPopup)
                 popup = tkinter.Menu(lbl, tearoff=0)
-                popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
-                                  self.removeAccount(f, aArg))
+                popup.add_command(label="Remove account", command=lambda aArg=a:
+                                  self.removeAccount(aArg))
                 lbl.popup = popup
                 row += 1
-        btn = tkinter.Button(frame, text="+", command=lambda f=frame: self.addAccountButton(f))
+        btn = tkinter.Button(self.tab4, text="+", command=lambda: self.addAccountButton())
         btn.grid(row=row, column=0)
 
-    def addAccountButton(self, frame):
+    def addAccountButton(self):
         self.mt.accounts.append(mt.Account("new"))
-        self.drawAccounts(frame)
+        self.drawAccounts()
 
-    def removeAccount(self, frame, a):
+    def removeAccount(self, a):
         self.mt.accounts.remove(a)
         for t in self.mt.transactions:
             if t.account == a:
                 t.account = None
-        self.drawAccounts(frame)
+        self.drawAccounts()
 
-    def selectAccount(self, frame, event):
+    def selectAccount(self, event):
         if self.selectedItem != event.widget.account:
             self.selectedItem = event.widget.account
-            self.drawAccounts(frame)
+            self.drawAccounts()
 
     @staticmethod
     def accountNameChanged(sv):
@@ -601,66 +605,62 @@ class MoneyWindow:
         canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
 
     # Popups
-    def drawAccountsPopup(self, frame, popup, func, filename):
-        deleteAllChildren(frame)
+    def drawAccountsPopup(self):
+        deleteAllChildren(self.popupFrame)
         row = 0
         for a in self.mt.accounts:
             if a == self.selectedItem:
                 sv = tkinter.StringVar()
                 sv.account = a
                 sv.trace("w", lambda name, index, mode, svArg=sv: self.accountNameChanged2(svArg))
-                e = tkinter.Entry(frame, textvariable=sv)
+                e = tkinter.Entry(self.popupFrame, textvariable=sv)
                 e.insert(0, a.name)
                 e.grid(sticky=tkinter.W, row=row, column=0)
                 e.bind("<Button-3>", showPopup)
                 popupR = tkinter.Menu(e, tearoff=0)
-                popupR.add_command(label="Remove account", command=lambda f=frame, aArg=a, p=popup, fu=func,
-                                   fi=filename: self.removeAccount2(f, aArg, p, fu, fi))
+                popupR.add_command(label="Remove account", command=lambda aArg=a: self.removeAccount2(aArg))
                 e.popup = popupR
                 row += 1
             else:
-                lbl = tkinter.Label(frame, text=a.name)
+                lbl = tkinter.Label(self.popupFrame, text=a.name)
                 lbl.grid(sticky=tkinter.W, row=row, column=0)
                 lbl.account = a
-                lbl.bind("<Button-1>", lambda event, f=frame, p=popup, fu=func, fi=filename:
-                         self.selectAccount2(f, event, p, fu, fi))
+                lbl.bind("<Button-1>", lambda event: self.selectAccount2(event))
                 lbl.bind("<Button-3>", showPopup)
                 popupR = tkinter.Menu(lbl, tearoff=0)
                 popupR.add_command(label="Remove account",
-                                   command=lambda f=frame, aArg=a, p=popup, fu=func, fi=filename:
-                                   self.removeAccount2(f, aArg, p, fu, fi))
+                                   command=lambda aArg=a:
+                                   self.removeAccount2(aArg))
                 lbl.popup = popupR
                 row += 1
-        btn = tkinter.Button(frame, text="+", command=lambda f=frame, p=popup, fu=func, fi=filename:
-                             self.addAccountButton2(f, p, fu, fi))
+        btn = tkinter.Button(self.popupFrame, text="+", command=self.addAccountButton2)
         btn.grid(row=row, column=0)
-        btn = tkinter.Button(frame, text="Select", command=lambda argPopup=popup, argFunc=func, argFilename=filename:
-                             self.selectAccountInPopup(argPopup, argFunc, argFilename))
+        btn = tkinter.Button(self.popupFrame, text="Select", command=self.selectAccountInPopup)
         btn.grid(row=row+1, column=0)
-        btn = tkinter.Button(frame, text="Cancel", command=popup.destroy)
+        btn = tkinter.Button(self.popupFrame, text="Cancel", command=self.popup.destroy)
         btn.grid(row=row+1, column=1)
 
-    def addAccountButton2(self, frame, popup, func, filename):
+    def addAccountButton2(self):
         self.mt.accounts.append(mt.Account("new"))
-        self.drawAccountsPopup(frame, popup, func, filename)
+        self.drawAccountsPopup()
 
-    def removeAccount2(self, frame, a, popup, func, filename):
+    def removeAccount2(self, a):
         self.mt.accounts.remove(a)
-        self.drawAccountsPopup(frame, popup, func, filename)
+        self.drawAccountsPopup()
 
-    def selectAccount2(self, frame, event, popup, func, filename):
+    def selectAccount2(self, event):
         if self.selectedItem != event.widget.account:
             self.selectedItem = event.widget.account
-            self.drawAccountsPopup(frame, popup, func, filename)
+            self.drawAccountsPopup()
 
     @staticmethod
     def accountNameChanged2(sv):
         sv.account.name = sv.get()
 
-    def selectAccountInPopup(self, popup, func, filename):
+    def selectAccountInPopup(self):
         if self.selectedItem in self.mt.accounts:
-            func(filename, self.selectedItem)
-            popup.destroy()
+            self.mt.loadTransactions(self.fileName, self.selectedItem)
+            self.popup.destroy()
             self.drawTransactions()
 
 
