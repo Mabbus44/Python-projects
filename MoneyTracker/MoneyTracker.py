@@ -22,42 +22,42 @@ class MoneyWindow:
         self.helpMenu = tkinter.Menu(self.menuBar, tearoff=0)
 
         self.tabControl = ttk.Notebook(self.window)
-        self.outerFrame1 = ttk.Frame(self.tabControl)
+        self.outerFrame1 = tkinter.Frame(self.tabControl)
         self.canvas1 = tkinter.Canvas(self.outerFrame1)
-        self.scrollbar1 = ttk.Scrollbar(self.outerFrame1, orient="vertical", command=self.canvas1.yview)
-        self.tab1 = ttk.Frame(self.canvas1)
+        self.scrollbar1 = tkinter.Scrollbar(self.outerFrame1, orient="vertical", command=self.canvas1.yview)
+        self.tab1 = tkinter.Frame(self.canvas1)
         self.canvas1.create_window((0, 0), window=self.tab1, anchor="nw")
         self.canvas1.configure(yscrollcommand=self.scrollbar1.set)
         self.tab1.bind("<Configure>", lambda e: self.canvas1.configure(scrollregion=self.canvas1.bbox("all")))
 
-        self.outerFrame2 = ttk.Frame(self.tabControl)
+        self.outerFrame2 = tkinter.Frame(self.tabControl)
         self.canvas2 = tkinter.Canvas(self.outerFrame2)
-        self.scrollbar2 = ttk.Scrollbar(self.outerFrame2, orient="vertical", command=self.canvas2.yview)
-        self.tab2 = ttk.Frame(self.canvas2)
+        self.scrollbar2 = tkinter.Scrollbar(self.outerFrame2, orient="vertical", command=self.canvas2.yview)
+        self.tab2 = tkinter.Frame(self.canvas2)
         self.canvas2.create_window((0, 0), window=self.tab2, anchor="nw")
         self.canvas2.configure(yscrollcommand=self.scrollbar2.set)
         self.tab2.bind("<Configure>", lambda e: self.canvas2.configure(scrollregion=self.canvas2.bbox("all")))
 
-        self.outerFrame3 = ttk.Frame(self.tabControl)
+        self.outerFrame3 = tkinter.Frame(self.tabControl)
         self.canvas3 = tkinter.Canvas(self.outerFrame3)
-        self.scrollbar3 = ttk.Scrollbar(self.outerFrame3, orient="vertical", command=self.canvas3.yview)
-        self.tab3 = ttk.Frame(self.canvas3)
+        self.scrollbar3 = tkinter.Scrollbar(self.outerFrame3, orient="vertical", command=self.canvas3.yview)
+        self.tab3 = tkinter.Frame(self.canvas3)
         self.canvas3.create_window((0, 0), window=self.tab3, anchor="nw")
         self.canvas3.configure(yscrollcommand=self.scrollbar3.set)
-        self.tab3.bind("<Configure>", lambda e: canvas3.configure(scrollregion=self.canvas3.bbox("all")))
+        self.tab3.bind("<Configure>", lambda e: self.canvas3.configure(scrollregion=self.canvas3.bbox("all")))
 
-        self.outerFrame4 = ttk.Frame(self.tabControl)
+        self.outerFrame4 = tkinter.Frame(self.tabControl)
         self.canvas4 = tkinter.Canvas(self.outerFrame4)
-        self.scrollbar4 = ttk.Scrollbar(self.outerFrame4, orient="vertical", command=self.canvas4.yview)
-        self.tab4 = ttk.Frame(self.canvas4)
+        self.scrollbar4 = tkinter.Scrollbar(self.outerFrame4, orient="vertical", command=self.canvas4.yview)
+        self.tab4 = tkinter.Frame(self.canvas4)
         self.canvas4.create_window((0, 0), window=self.tab4, anchor="nw")
         self.canvas4.configure(yscrollcommand=self.scrollbar4.set)
         self.tab4.bind("<Configure>", lambda e: self.canvas4.configure(scrollregion=self.canvas4.bbox("all")))
 
-        self.outerFrame5 = ttk.Frame(self.tabControl)
+        self.outerFrame5 = tkinter.Frame(self.tabControl)
         self.canvas5 = tkinter.Canvas(self.outerFrame5)
-        self.scrollbar5 = ttk.Scrollbar(self.outerFrame5, orient="vertical", command=self.canvas5.yview)
-        self.tab5 = ttk.Frame(self.canvas5)
+        self.scrollbar5 = tkinter.Scrollbar(self.outerFrame5, orient="vertical", command=self.canvas5.yview)
+        self.tab5 = tkinter.Frame(self.canvas5)
         self.canvas5.create_window((0, 0), window=self.tab5, anchor="nw")
         self.canvas5.configure(yscrollcommand=self.scrollbar5.set)
         self.tab5.bind("<Configure>", lambda e: self.canvas5.configure(scrollregion=self.canvas5.bbox("all")))
@@ -65,7 +65,7 @@ class MoneyWindow:
         self.window.title("Money tracker")
         self.window.geometry("920x800")
         self.fileMenu.add_command(label="import transactions", command=self.loadFileButton)
-        self.fileMenu.add_command(label="new", command=self.mt.newProject)
+        self.fileMenu.add_command(label="new", command=self.newProject)
         self.fileMenu.add_command(label="open", command=self.openProject)
         self.fileMenu.add_command(label="save", command=self.saveProject)
         self.helpMenu.add_command(label="about", command=lambda: messagebox.showinfo("About", "Money tracker v0.1"))
@@ -79,7 +79,7 @@ class MoneyWindow:
         self.tabControl.add(self.outerFrame4, text="Accounts")
         self.tabControl.add(self.outerFrame5, text="Graphs")
         self.tabControl.pack(expand=1, fill="both")
-        self.tabControl.bind("<<NotebookTabChanged>>", lambda event: self.tabChanged(event))
+        self.tabControl.bind("<<NotebookTabChanged>>", lambda event: self.tabChanged())
 
         self.canvas1.pack(side="left", fill="both", expand=True)
         self.scrollbar1.pack(side="right", fill="y")
@@ -96,7 +96,7 @@ class MoneyWindow:
     def mainLoop(self):
         self.window.mainloop()
 
-    def tabChanged(self, event):
+    def tabChanged(self):
         if self.tabControl.tab(self.tabControl.select(), "text") == "Transactions":
             self.drawTransactions()
         if self.tabControl.tab(self.tabControl.select(), "text") == "Rules":
@@ -108,12 +108,16 @@ class MoneyWindow:
         if self.tabControl.tab(self.tabControl.select(), "text") == "Graphs":
             self.drawGraphs()
 
+    def newProject(self):
+        self.mt.newProject()
+        self.tabChanged()
+
     def openProject(self):
         fileName = filedialog.askopenfilename(initialdir="/", title="Save file",
                                               filetypes=(("Money tracker project files", "*.mtp"),
                                                          ("all files", "*.*")))
         if fileName:
-            if mt.openProject(fileName) == -1:
+            if self.mt.openProject(fileName) == -1:
                 messagebox.showerror("Error", "Could not load file, program version to old")
                 return
             self.drawTransactions()
@@ -132,33 +136,33 @@ class MoneyWindow:
     # Transactions tab
     def drawTransactions(self):
         deleteAllChildren(self.tab1)
-        btn = ttk.Button(self.tab1, text="Apply rules", command=self.applyRulesButton)
+        btn = tkinter.Button(self.tab1, text="Apply rules", command=self.applyRulesButton)
         btn.grid(column=0, row=0)
-        lbl = ttk.Label(self.tab1, text="Date")
+        lbl = tkinter.Label(self.tab1, text="Date")
         lbl.grid(sticky=tkinter.W, row=1, column=0)
-        lbl = ttk.Label(self.tab1, text="Text")
+        lbl = tkinter.Label(self.tab1, text="Text")
         lbl.grid(sticky=tkinter.W, row=1, column=1)
-        lbl = ttk.Label(self.tab1, text="Amount")
+        lbl = tkinter.Label(self.tab1, text="Amount")
         lbl.grid(sticky=tkinter.W, row=1, column=2)
-        lbl = ttk.Label(self.tab1, text="Balance")
+        lbl = tkinter.Label(self.tab1, text="Balance")
         lbl.grid(sticky=tkinter.W, row=1, column=3)
-        lbl = ttk.Label(self.tab1, text="Account")
+        lbl = tkinter.Label(self.tab1, text="Account")
         lbl.grid(sticky=tkinter.W, row=1, column=4)
-        lbl = ttk.Label(self.tab1, text="Category")
+        lbl = tkinter.Label(self.tab1, text="Category")
         lbl.grid(sticky=tkinter.W, row=1, column=5)
         row = 2
         for t in self.mt.transactions:
             lbl = tkinter.Label(self.tab1, text=t.dateTime)
             lbl.grid(sticky=tkinter.W, row=row, column=0)
-            lbl = ttk.Label(self.tab1, text=t.text)
+            lbl = tkinter.Label(self.tab1, text=t.text)
             lbl.grid(sticky=tkinter.W, row=row, column=1)
-            lbl = ttk.Label(self.tab1, text=t.amount)
+            lbl = tkinter.Label(self.tab1, text=t.amount)
             lbl.grid(sticky=tkinter.W, row=row, column=2)
-            lbl = ttk.Label(self.tab1, text=t.balance)
+            lbl = tkinter.Label(self.tab1, text=t.balance)
             lbl.grid(sticky=tkinter.W, row=row, column=3)
-            lbl = ttk.Label(self.tab1, text=t.account.name if t.account else "None")
+            lbl = tkinter.Label(self.tab1, text=t.account.name if t.account else "None")
             lbl.grid(sticky=tkinter.W, row=row, column=4)
-            lbl = ttk.Label(self.tab1, text=t.category.name if t.category else "None")
+            lbl = tkinter.Label(self.tab1, text=t.category.name if t.category else "None")
             lbl.grid(sticky=tkinter.W, row=row, column=5)
             row += 1
 
@@ -170,14 +174,14 @@ class MoneyWindow:
             popup.grab_set()
             popup.title("Accounts")
             popup.geometry("500x400")
-            popupFrame = ttk.Frame(popup)
+            popupFrame = tkinter.Frame(popup)
             popupFrame.pack()
             self.drawAccountsPopup(popupFrame, popup, self.mt.loadTransactions, filename)
 
     def applyRulesButton(self):
         for t in self.mt.transactions:
             if not t.category:
-                for r in self.rules:
+                for r in self.mt.rules:
                     ruleApplies = True
                     for c in r.conditions:
                         field = 0
@@ -217,7 +221,7 @@ class MoneyWindow:
         deleteAllChildren(self.tab2)
         row = 0
         for r in self.mt.rules:
-            if r == selectedItem:
+            if r == self.selectedItem:
                 categoriesTextList = []
                 selectedIndex = 0
                 for c in self.mt.categories:
@@ -228,7 +232,7 @@ class MoneyWindow:
                 combo.grid(row=row, column=0)
                 combo.current(selectedIndex)
                 combo.bind("<<ComboboxSelected>>", self.ruleCategorySelected)
-                combo.bind("<Button-3>", self.rightClickRule)
+                combo.bind("<Button-3>", showPopup)
                 popup = tkinter.Menu(combo, tearoff=0)
                 popup.add_command(label="Remove rule", command=lambda rArg=r: self.removeRule(rArg))
                 combo.popup = popup
@@ -240,7 +244,7 @@ class MoneyWindow:
                     combo2.grid(row=row, column=1)
                     combo2.current(c.conditionType-1)
                     combo2.bind("<<ComboboxSelected>>", self.conditionTypeSelected)
-                    combo2.bind("<Button-3>", self.rightClickRule)
+                    combo2.bind("<Button-3>", showPopup)
                     popup = tkinter.Menu(combo2, tearoff=0)
                     popup.add_command(label="Remove condition",
                                       command=lambda rArg=r, cArg=c: self.removeCondition(rArg, cArg))
@@ -249,10 +253,10 @@ class MoneyWindow:
                     sv = tkinter.StringVar()
                     sv.condition = c
                     sv.trace("w", lambda name, index, mode, svArg=sv: self.conditionValueChanged(svArg))
-                    e = ttk.Entry(self.tab2, textvariable=sv)
+                    e = tkinter.Entry(self.tab2, textvariable=sv)
                     e.insert(0, c.value)
                     e.grid(sticky=tkinter.W, row=row, column=2)
-                    e.bind("<Button-3>", self.rightClickRule)
+                    e.bind("<Button-3>", showPopup)
                     popup = tkinter.Menu(e, tearoff=0)
                     popup.add_command(label="Remove condition",
                                       command=lambda rArg=r, cArg=c: self.removeCondition(rArg, cArg))
@@ -261,7 +265,7 @@ class MoneyWindow:
                     combo1.grid(row=row, column=0)
                     combo1.current(c.field-1)
                     combo1.bind("<<ComboboxSelected>>", self.conditionFieldSelected)
-                    combo1.bind("<Button-3>", self.rightClickRule)
+                    combo1.bind("<Button-3>", showPopup)
                     popup = tkinter.Menu(combo1, tearoff=0)
                     popup.add_command(label="Remove condition",
                                       command=lambda rArg=r, cArg=c: self.removeCondition(rArg, cArg))
@@ -270,49 +274,49 @@ class MoneyWindow:
                     combo1.conditionTypeBox = combo2
                     combo1.valueBox = sv
                     row += 1
-                btn = ttk.Button(self.tab2, text="+", command=lambda argR=r: self.addConditionButton(argR))
+                btn = tkinter.Button(self.tab2, text="+", command=lambda argR=r: self.addConditionButton(argR))
                 btn.grid(row=row, column=1)
                 row += 1
             else:
-                lbl = ttk.Label(self.tab2, text=r.category.name)
+                lbl = tkinter.Label(self.tab2, text=r.category.name)
                 lbl.grid(sticky=tkinter.W, row=row, column=0)
                 lbl.rule = r
                 lbl.bind("<Button-1>", self.selectRule)
-                lbl.bind("<Button-3>", self.rightClickRule)
+                lbl.bind("<Button-3>", showPopup)
                 popup = tkinter.Menu(lbl, tearoff=0)
                 popup.add_command(label="Remove rule", command=lambda rArg=r: self.removeRule(rArg))
                 lbl.popup = popup
                 row += 1
                 for c in r.conditions:
-                    lbl = ttk.Label(self.tab2, text=self.fieldString(c.field), padx=10)
+                    lbl = tkinter.Label(self.tab2, text=mt.fieldString(c.field), padx=10)
                     lbl.grid(sticky=tkinter.W, row=row, column=0)
                     lbl.rule = r
                     lbl.bind("<Button-1>", self.selectRule)
-                    lbl.bind("<Button-3>", self.rightClickRule)
+                    lbl.bind("<Button-3>", showPopup)
                     popup = tkinter.Menu(lbl, tearoff=0)
                     popup.add_command(label="Remove condition",
                                       command=lambda rArg=r, cArg=c: self.removeCondition(rArg, cArg))
                     lbl.popup = popup
-                    lbl = ttk.Label(self.tab2, text=mt.condString(c.conditionType))
+                    lbl = tkinter.Label(self.tab2, text=mt.condString(c.conditionType))
                     lbl.grid(sticky=tkinter.W, row=row, column=1)
                     lbl.rule = r
                     lbl.bind("<Button-1>", self.selectRule)
-                    lbl.bind("<Button-3>", self.rightClickRule)
+                    lbl.bind("<Button-3>", showPopup)
                     popup = tkinter.Menu(lbl, tearoff=0)
                     popup.add_command(label="Remove condition",
                                       command=lambda rArg=r, cArg=c: self.removeCondition(rArg, cArg))
                     lbl.popup = popup
-                    lbl = ttk.Label(self.tab2, text=c.value)
+                    lbl = tkinter.Label(self.tab2, text=c.value)
                     lbl.grid(sticky=tkinter.W, row=row, column=2)
                     lbl.rule = r
                     lbl.bind("<Button-1>", self.selectRule)
-                    lbl.bind("<Button-3>", self.rightClickRule)
+                    lbl.bind("<Button-3>", showPopup)
                     popup = tkinter.Menu(lbl, tearoff=0)
                     popup.add_command(label="Remove condition",
                                       command=lambda rArg=r, cArg=c: self.removeCondition(rArg, cArg))
                     lbl.popup = popup
                     row += 1
-        btn = ttk.Button(self.tab2, text="+", command=self.addRuleButton)
+        btn = tkinter.Button(self.tab2, text="+", command=self.addRuleButton)
         btn.grid(row=row, column=0)
 
     def addRuleButton(self):
@@ -320,15 +324,8 @@ class MoneyWindow:
         self.drawRules()
 
     def addConditionButton(self, r):
-        self.mt.appendCondition(r)
+        r.appendCondition()
         self.drawRules()
-
-    def rightClickRule(self, event):
-        popup = event.widget.popup
-        try:
-            popup.tk_popup(event.x_root+60, event.y_root+13, 0)
-        finally:
-            popup.grab_release()
 
     def removeRule(self, r):
         self.mt.rules.remove(r)
@@ -348,7 +345,8 @@ class MoneyWindow:
     def ruleCategorySelected(self, event):
         event.widget.rule.category = self.mt.categories[event.widget.current()]
 
-    def conditionFieldSelected(self, event):
+    @staticmethod
+    def conditionFieldSelected(event):
         event.widget.condition.field = event.widget.current()+1
         if event.widget.condition.field == mt.FIELD["DATETIME"]:
             try:
@@ -359,10 +357,12 @@ class MoneyWindow:
             event.widget.condition.value = mt.str2float(event.widget.valueBox.get())
             event.widget.valueBox.set(str(event.widget.condition.value))
 
-    def conditionTypeSelected(self, event):
+    @staticmethod
+    def conditionTypeSelected(event):
         event.widget.condition.conditionType = event.widget.current()+1
 
-    def conditionValueChanged(self, sv):
+    @staticmethod
+    def conditionValueChanged(sv):
         if sv.condition.field == mt.FIELD["AMOUNT"]:
             sv.condition.value = mt.str2float(sv.get())
         if sv.condition.field == mt.FIELD["TEXT"]:
@@ -409,7 +409,8 @@ class MoneyWindow:
             catCopy.remove(category)
             return
 
-    def rightClickCategory(self, event):
+    @staticmethod
+    def rightClickCategory(event):
         iid = event.widget.identify_row(event.y)
         if iid:
             event.widget.selection_set(iid)
@@ -426,7 +427,7 @@ class MoneyWindow:
             self.renameCategory(event.widget)
 
     def addCategory(self, tree):
-        name = simpledialog.askstring("Category", "Name category", parent=window)
+        name = simpledialog.askstring("Category", "Name category", parent=self.window)
         if name is None:
             return
         if int(tree.selection()[0]) == 0:
@@ -466,43 +467,36 @@ class MoneyWindow:
         deleteAllChildren(frame)
         row = 0
         for a in self.mt.accounts:
-            if a == selectedItem:
+            if a == self.selectedItem:
                 sv = tkinter.StringVar()
                 sv.account = a
                 sv.trace("w", lambda name, index, mode, svArg=sv: self.accountNameChanged(svArg))
-                e = ttk.Entry(frame, textvariable=sv)
+                e = tkinter.Entry(frame, textvariable=sv)
                 e.insert(0, a.name)
                 e.grid(sticky=tkinter.W, row=row, column=0)
-                e.bind("<Button-3>", self.rightClickAccount)
+                e.bind("<Button-3>", showPopup)
                 popup = tkinter.Menu(e, tearoff=0)
                 popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
                                   self.removeAccount(f, aArg))
                 e.popup = popup
                 row += 1
             else:
-                lbl = ttk.Label(frame, text=a.name)
+                lbl = tkinter.Label(frame, text=a.name)
                 lbl.grid(sticky=tkinter.W, row=row, column=0)
                 lbl.account = a
                 lbl.bind("<Button-1>", lambda event, f=frame: self.selectAccount(f, event))
-                lbl.bind("<Button-3>", self.rightClickAccount)
+                lbl.bind("<Button-3>", showPopup)
                 popup = tkinter.Menu(lbl, tearoff=0)
                 popup.add_command(label="Remove account", command=lambda f=frame, aArg=a:
                                   self.removeAccount(f, aArg))
                 lbl.popup = popup
                 row += 1
-        btn = ttk.Button(frame, text="+", command=lambda f=frame: self.addAccountButton(f))
+        btn = tkinter.Button(frame, text="+", command=lambda f=frame: self.addAccountButton(f))
         btn.grid(row=row, column=0)
 
     def addAccountButton(self, frame):
         self.mt.accounts.append(mt.Account("new"))
         self.drawAccounts(frame)
-
-    def rightClickAccount(self, event):
-        popup = event.widget.popup
-        try:
-            popup.tk_popup(event.x_root+60, event.y_root+13, 0)
-        finally:
-            popup.grab_release()
 
     def removeAccount(self, frame, a):
         self.mt.accounts.remove(a)
@@ -516,7 +510,8 @@ class MoneyWindow:
             self.selectedItem = event.widget.account
             self.drawAccounts(frame)
 
-    def accountNameChanged(self, sv):
+    @staticmethod
+    def accountNameChanged(sv):
         sv.account.name = sv.get()
 
     # Graphs tab
@@ -529,7 +524,7 @@ class MoneyWindow:
         for c in self.mt.categories:
             c.posSum = 0
             c.negSum = 0
-            c.children = [self.mt.Category(c.name)]
+            c.children = [mt.Category(c.name)]
         level1Categories = []
         for c in self.mt.categories:
             if c.parent:
@@ -607,54 +602,47 @@ class MoneyWindow:
 
     # Popups
     def drawAccountsPopup(self, frame, popup, func, filename):
-        self.deleteAllChildren(frame)
+        deleteAllChildren(frame)
         row = 0
         for a in self.mt.accounts:
-            if a == selectedItem:
+            if a == self.selectedItem:
                 sv = tkinter.StringVar()
                 sv.account = a
                 sv.trace("w", lambda name, index, mode, svArg=sv: self.accountNameChanged2(svArg))
-                e = ttk.Entry(frame, textvariable=sv)
+                e = tkinter.Entry(frame, textvariable=sv)
                 e.insert(0, a.name)
                 e.grid(sticky=tkinter.W, row=row, column=0)
-                e.bind("<Button-3>", self.rightClickAccount2)
+                e.bind("<Button-3>", showPopup)
                 popupR = tkinter.Menu(e, tearoff=0)
                 popupR.add_command(label="Remove account", command=lambda f=frame, aArg=a, p=popup, fu=func,
                                    fi=filename: self.removeAccount2(f, aArg, p, fu, fi))
                 e.popup = popupR
                 row += 1
             else:
-                lbl = ttk.Label(frame, text=a.name)
+                lbl = tkinter.Label(frame, text=a.name)
                 lbl.grid(sticky=tkinter.W, row=row, column=0)
                 lbl.account = a
                 lbl.bind("<Button-1>", lambda event, f=frame, p=popup, fu=func, fi=filename:
                          self.selectAccount2(f, event, p, fu, fi))
-                lbl.bind("<Button-3>", self.rightClickAccount2)
+                lbl.bind("<Button-3>", showPopup)
                 popupR = tkinter.Menu(lbl, tearoff=0)
                 popupR.add_command(label="Remove account",
                                    command=lambda f=frame, aArg=a, p=popup, fu=func, fi=filename:
                                    self.removeAccount2(f, aArg, p, fu, fi))
                 lbl.popup = popupR
                 row += 1
-        btn = ttk.Button(frame, text="+", command=lambda f=frame, p=popup, fu=func, fi=filename:
-                         self.addAccountButton2(f, p, fu, fi))
+        btn = tkinter.Button(frame, text="+", command=lambda f=frame, p=popup, fu=func, fi=filename:
+                             self.addAccountButton2(f, p, fu, fi))
         btn.grid(row=row, column=0)
-        btn = ttk.Button(frame, text="Select", command=lambda argPopup=popup, argFunc=func, argFilename=filename:
-                         self.selectAccountInPopup(argPopup, argFunc, argFilename))
+        btn = tkinter.Button(frame, text="Select", command=lambda argPopup=popup, argFunc=func, argFilename=filename:
+                             self.selectAccountInPopup(argPopup, argFunc, argFilename))
         btn.grid(row=row+1, column=0)
-        btn = ttk.Button(frame, text="Cancel", command=popup.destroy)
+        btn = tkinter.Button(frame, text="Cancel", command=popup.destroy)
         btn.grid(row=row+1, column=1)
 
     def addAccountButton2(self, frame, popup, func, filename):
         self.mt.accounts.append(mt.Account("new"))
         self.drawAccountsPopup(frame, popup, func, filename)
-
-    def rightClickAccount2(self, event):
-        popup = event.widget.popup
-        try:
-            popup.tk_popup(event.x_root+60, event.y_root+13, 0)
-        finally:
-            popup.grab_release()
 
     def removeAccount2(self, frame, a, popup, func, filename):
         self.mt.accounts.remove(a)
@@ -665,7 +653,8 @@ class MoneyWindow:
             self.selectedItem = event.widget.account
             self.drawAccountsPopup(frame, popup, func, filename)
 
-    def accountNameChanged2(self, sv):
+    @staticmethod
+    def accountNameChanged2(sv):
         sv.account.name = sv.get()
 
     def selectAccountInPopup(self, popup, func, filename):
@@ -683,3 +672,11 @@ def deleteAllChildren(item):
             _list.extend(item.winfo_children())
     for i in _list:
         i.destroy()
+
+
+def showPopup(event):
+    popup = event.widget.popup
+    try:
+        popup.tk_popup(event.x_root+60, event.y_root+13, 0)
+    finally:
+        popup.grab_release()

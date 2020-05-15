@@ -40,10 +40,6 @@ class MoneyTracker:
         r.conditions.append(c)
         self.rules.append(r)
 
-    def appendCondition(self, r, field=FIELD["TEXT"], cond=COND["C"], text="Type text here"):
-        c = Condition(field, cond, text)
-        r.conditions.append(c)
-
     def newProject(self):
         self.transactions.clear()
         for r in self.rules:
@@ -196,6 +192,9 @@ class Rule:
         self.conditions = []
         self.category = category
 
+    def appendCondition(self, field=FIELD["TEXT"], cond=COND["C"], text="Type text here"):
+        self.conditions.append(Condition(field, cond, text))
+
 
 class Condition:
     def __init__(self, field, conditionType, value):
@@ -236,7 +235,7 @@ def str2float(string):
             newString = newString + c
             firstNumberFound = True
         if not commaFound and firstNumberFound:
-            if c in self.decimalSeparator:
+            if c in decimalSeparator:
                 newString = newString + "."
                 commaFound = True
     if firstNumberFound:
