@@ -20,8 +20,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4f8b85f8-534d-4082-88df-e31dec9e44bb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/MoneyTracker.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MoneyWindow.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MTBackend.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/rasun.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/rasun.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoneyTracker.py" beforeDir="false" afterPath="$PROJECT_DIR$/MoneyTracker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoneyWindow.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
